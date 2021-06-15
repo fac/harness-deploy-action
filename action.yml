@@ -1,0 +1,28 @@
+# See: https://docs.github.com/en/actions/creating-actions
+name: TODO:Action Name
+author: FreeAgent
+description: TODO:Description
+#  inputs:
+#    foo:
+#      description: Foo level
+#      required: true
+#      default: 23
+#  outputs:
+#    bar:
+#      description: Bar output
+
+runs:
+  # Pick one of the 3 possible types of action:
+
+  #using: 'composite'
+  #steps:
+  #  - name: Step One
+  #    shell: bash
+  #    run: |
+  #      echo TODO: Step One
+
+  #using: 'node12'
+  #main: main.js
+
+  #using: 'docker'
+  #image: 'Dockerfile'
