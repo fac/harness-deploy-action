@@ -1,6 +1,8 @@
-# Action Name
+# Harness Deploy Action
 
 ## Description
+
+Call the Harness.io API to deploy an application.
 
 ## Usage
 

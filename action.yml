@@ -1,28 +1,30 @@
 # See: https://docs.github.com/en/actions/creating-actions
-name: TODO:Action Name
+name: Harness Deploy Action
 author: FreeAgent
-description: TODO:Description
-#  inputs:
-#    foo:
-#      description: Foo level
-#      required: true
-#      default: 23
-#  outputs:
-#    bar:
-#      description: Bar output
+description: Call the Harness.io API to deploy an application
+inputs:
+  application:
+    description: Harness application
+    required: true
+  services:
+    description: List of service names to deploy
+    required: true
+  webhookUrl:
+    description: The secret
+    required: true
+  version:
+    description: Optional version to deploy
+    required: false
+outputs:
+  harness_url:
+    description: URL to find and watch the deploy
+  error:
+    description: JSON error message from the API incase of failure.
 
 runs:
-  # Pick one of the 3 possible types of action:
-
-  #using: 'composite'
-  #steps:
-  #  - name: Step One
-  #    shell: bash
-  #    run: |
-  #      echo TODO: Step One
-
-  #using: 'node12'
-  #main: main.js
-
-  #using: 'docker'
-  #image: 'Dockerfile'
+  using: 'composite'
+  steps:
+   - name: Step One
+     shell: bash
+     run: |
+       echo TODO: Step One
