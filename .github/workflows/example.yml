@@ -1,0 +1,27 @@
+name: Example Harness Deploy
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  example:
+    runs-on: ubuntu-latest
+    steps:
+      - name: get currently deployed version
+        run: |
+          echo "SANDBOX_REVISION=$(curl -sI https://signup.sandbox.freeagent.com/signup | grep X-Rev: | cut -f2 -d' ')" >> $GITHUB_ENV
+
+      - uses: actions/checkout@v2
+
+      - name: harness-deploy-action
+        id: harness-deploy-action
+        uses: ./
+        with:
+          webhookUrl: ${{ secrets.HARNESS_WEBHOOK_URL }}
+          application: ${{ secrets.HARNESS_APPLICATION }}
+          services: web,console-rw,console-ro,job,deferred,scheduled,redirect,sidekiq
+          version: ${{ env.SANDBOX_REVISION }}
+
+      - name: output
+        run: |
+          echo harness_url: ${{ steps.harness-deploy-action.outputs.harness_url }}

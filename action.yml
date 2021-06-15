@@ -3,14 +3,14 @@ name: Harness Deploy Action
 author: FreeAgent
 description: Call the Harness.io API to deploy an application
 inputs:
+  webhookUrl:
+    description: The secret
+    required: true
   application:
     description: Harness application
     required: true
   services:
     description: List of service names to deploy
-    required: true
-  webhookUrl:
-    description: The secret
     required: true
   version:
     description: Optional version to deploy
@@ -22,9 +22,5 @@ outputs:
     description: JSON error message from the API incase of failure.
 
 runs:
-  using: 'composite'
-  steps:
-   - name: Step One
-     shell: bash
-     run: |
-       echo TODO: Step One
+  using: 'node12'
+  main: index.js
