@@ -7,10 +7,6 @@ jobs:
   example:
     runs-on: ubuntu-latest
     steps:
-      - name: get currently deployed version
-        run: |
-          echo "SANDBOX_REVISION=$(curl -sI https://signup.sandbox.freeagent.com/signup | grep X-Rev: | cut -f2 -d' ')" >> $GITHUB_ENV
-
       - uses: actions/checkout@v2
 
       - name: harness-deploy-action
@@ -18,9 +14,9 @@ jobs:
         uses: ./
         with:
           webhookUrl: ${{ secrets.HARNESS_WEBHOOK_URL }}
-          application: ${{ secrets.HARNESS_APPLICATION }}
-          services: web,console-rw,console-ro,job,deferred,scheduled,redirect,sidekiq
-          version: ${{ env.SANDBOX_REVISION }}
+          application: XYZ12345678ABC
+          services: web,console,job
+          version: ${{ github.sha }}
 
       - name: output
         run: |
