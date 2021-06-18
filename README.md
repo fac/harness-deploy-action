@@ -38,11 +38,8 @@ you want to use and copy the Webhook URL from the top of the dialog that opens.
 
 ### application
 
-String id of the application to deploy.
-
-You may want to use a secret if your repo (and hence workflow file) are public.
-However, this will break the harness_url output when displayed by github actions,
-as it includes the application in the URL and Actions will redact it.
+String id of the application to deploy. You can get this from harness, by going
+to *Setup >> App Name* and then copying from the url, path segment after `app/`.
 
 ### services
 
