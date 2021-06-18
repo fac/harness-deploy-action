@@ -4,17 +4,17 @@ author: FreeAgent
 description: Call the Harness.io API to deploy an application
 inputs:
   webhookUrl:
-    description: The secret
+    description: Harness manual trigger Webhook URL
     required: true
   application:
-    description: Harness application
+    description: Harness application to deploy
     required: true
   services:
     description: List of service names to deploy
     required: true
   version:
-    description: Optional version to deploy
-    required: false
+    description: Version to deploy
+    required: true
 outputs:
   harness_url:
     description: URL to find and watch the deploy

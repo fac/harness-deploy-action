@@ -2,7 +2,7 @@
 
 ## Description
 
-Call the Harness.io API to deploy an application.
+Call the [Harness.io](https://harness.io/) API to deploy an application.
 
 ## Usage
 
@@ -25,15 +25,24 @@ Call the Harness.io API to deploy an application.
 
 ### webhookUrl
 
-The full webhook url for harness, including the authentication token. You **should** pass this as a secret.
+The full webhook url for harness, including the authentication token. Add the
+URL as an Actions secret on your repo, and pass it to the action.
 
-e.g. `https://app.harness.io/gateway/api/webhooks/XXXXXXXX?accountId=YYYYYYYYYY`, where `XXXXXXXX` and `YYYYYYYY` are actual tokens. You can get this from the harness UI.
+The value needs to be the complete URL (include `https://`), the action will
+make a request using it as it, with a payload built from the other inputs.
+
+For this you need to a [Harness webhook trigger](https://docs.harness.io/article/ys3cvwm5gc-trigger-a-deployment-on-git-event)
+setup with a custom payload. Go to *Setup >> App Name >> Triggers* in the UI,
+you can add a trigger if you don't have one. Click *Manual Trigger* on the one
+you want to use and copy the Webhook URL from the top of the dialog that opens.
 
 ### application
 
 String id of the application to deploy.
 
-You may want to use a secret if your repo (and hence workflow file) are public, however this will break the URL when displayed by github actions.
+You may want to use a secret if your repo (and hence workflow file) are public.
+However, this will break the harness_url output when displayed by github actions,
+as it includes the application in the URL and Actions will redact it.
 
 ### services
 
@@ -52,7 +61,7 @@ id.
 
 ### error
 
-If the harness API returned and error it will be in this output.
+If the harness API returned an error, it will be in this output.
 ## Environment Variables
 
 None.
