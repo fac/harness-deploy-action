@@ -2,20 +2,69 @@
 
 ## Description
 
-Call the Harness.io API to deploy an application.
+Call the [Harness.io](https://harness.io/) API to deploy an application.
 
 ## Usage
 
+```yaml
+   - name: Deploy
+     id: deploy
+     uses: fac/harness-deploy-action@v1
+     with:
+       webhookUrl: ${{ secrets.HARNESS_WEBHOOK_URL }}
+       application: XYZ12345678ABC
+       services: web,console,job
+       version: ${{ github.sha }}
+
+   - name: Deploy Link
+     run: |
+       echo harness_url: ${{ steps.deploy.outputs.harness_url }}
+```
+
 ## Inputs
+
+### webhookUrl
+
+The full webhook url for harness, including the authentication token. Add the
+URL as an Actions secret on your repo, and pass it to the action.
+
+The value needs to be the complete URL (include `https://`), the action will
+make a request using it as it, with a payload built from the other inputs.
+
+For this you need to a [Harness webhook trigger](https://docs.harness.io/article/ys3cvwm5gc-trigger-a-deployment-on-git-event)
+setup with a custom payload. Go to *Setup >> App Name >> Triggers* in the UI,
+you can add a trigger if you don't have one. Click *Manual Trigger* on the one
+you want to use and copy the Webhook URL from the top of the dialog that opens.
+
+### application
+
+String id of the application to deploy. You can get this from harness, by going
+to *Setup >> App Name* and then copying from the url, path segment after `app/`.
+
+### services
+
+String, comma separated list of services to deploy.
+
+### version
+
+String version to deploy.
 
 ## Outputs
 
-## Secrets
+### harness_url
 
+The harness url to watch the deploy on. Note that this contains the application
+id.
+
+### error
+
+If the harness API returned an error, it will be in this output.
 ## Environment Variables
 
+None.
 ## Authors
 
+* FreeAgent dev-platform opensource@freeagent.com
 ## Licence
 
 ```
