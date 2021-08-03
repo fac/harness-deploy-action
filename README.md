@@ -35,9 +35,21 @@ npm run prepare
 
 Since the packaged index.js is run from the dist folder.
 
+After pushing to GitHub, an Action running on this repo will check if the `dist/` folder is up to date for you, and warn if it's not.
+
 ```bash
 git add dist
 ```
+
+## Run tests
+
+Run tests using
+
+```bash
+npm run test
+````
+
+Tests are also run in an action on GitHub.
 
 ## Inputs
 
