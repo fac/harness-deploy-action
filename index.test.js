@@ -1,3 +1,4 @@
-test('adds 1 + 2 to equal 3', () => {
-    expect(1 + 2).toBe(3);
+const core = require('@actions/core');
+test('calls harnessDeployment with the passed args', () => {
+    const index = require('./index.js');
 });
