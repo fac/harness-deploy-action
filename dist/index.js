@@ -10,9 +10,6 @@ const github = __nccwpck_require__(438);
 const http = __nccwpck_require__(211);
 
 function do_the_response(statusCode, data) {
-  // this is a test change
-  core.info("⚠️ Test change")
-
   const { uiUrl, error } = data;
   core.setOutput("harness_url", uiUrl);
   core.setOutput("error", error);
