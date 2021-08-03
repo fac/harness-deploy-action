@@ -4,8 +4,7 @@
   "main": "index.js",
   "version": "1.0.0",
   "scripts": {
-    "test": "jest",
-    "prepare": "ncc build index.js -o dist --source-map --license licenses.txt"
+    "test": "jest"
   },
   "dependencies": {
     "@actions/core": "^1.4.0",
