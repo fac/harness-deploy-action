@@ -6,7 +6,8 @@ try {
     core.getInput('webhookUrl'),
     core.getInput('application'),
     core.getInput('version'),
-    core.getInput('services')
+    core.getInput('services'),
+    core.getInput('poll_for_deploy_completion')
   );
 
   harnessDeployment.start();
