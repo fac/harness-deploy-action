@@ -9,11 +9,12 @@ const core = __nccwpck_require__(186);
 const github = __nccwpck_require__(438);
 
 class HarnessDeployment {
-    constructor(webhookUrl, application, version, services) {
+    constructor(webhookUrl, application, version, services, poll_for_deploy_completion) {
         this.webhookUrl = webhookUrl,
         this.application = application,
         this.version = version,
-        this.services = services
+        this.services = services,
+        this.poll_for_deploy_completion = poll_for_deploy_completion
     }
 
     start() {
@@ -55,6 +56,10 @@ class HarnessDeployment {
                 core.info("🚀 Deployment pipeline is now running on Harness")
             }
             core.info(`Harness deploy submitted, view at ${uiUrl}`)
+
+            if (this.poll_for_deploy_completion == 'true') {
+                this.pollForDeployCompletion(data.apiUrl);
+            }
         } else {
             if (error) {
                 core.error(`💣 Failed to start deployment: ${error}`)
@@ -63,6 +68,57 @@ class HarnessDeployment {
             }
 
             core.setFailed(error || 'Unknown');
+        }
+    }
+
+    pollForDeployCompletion(apiUrl) {
+        while (true) {
+            sleep(10)
+
+            // From groovy lib, fix for bug, needs carried forward?
+            // Workaround for a bug in the Harness API response, wrong URL is returned
+            // apiUrl = apiUrl.replaceFirst("harness.io/api", "harness.io/gateway/api")
+
+            var request = new XMLHttpRequest();
+            request.open('GET', this.apiUrl, false);  // `false` makes the request synchronous
+            request.setRequestHeader('X-Api-Key', process.env.HARNESS_API_KEY,);
+            request.send();
+
+            const ignoreResponses = [408, 429, 503]
+             if (ignoreResponses.includes(response.status)) {
+                 continue;
+             }
+
+            // TODO: Find the right bit of the response to switch on. This is
+            // This is the Jenkins code for reference:
+            // def parsedResponse = new JsonSlurperClassic().parseText(response.getContent())
+            const response = request.responseText
+
+            switch (parsedResponse.status) {
+              case "RUNNING":
+                console.log("⏳ Deployment is running")
+                break
+              case "QUEUED":
+                console.log("⏳ Deployment is queued")
+                break
+              case "SUCCESS":
+                console.log("🎉 Deployment succeeded")
+                break
+              case "ABORTED":
+                core.error("🛑 Deployment was aborted or cancelled")
+                break
+              case "REJECTED":
+                core.error("🛑 Deployment was rejected")
+                break
+              case "FAILED":
+                core.error("💣 Deployment has failed. Check the Harness link for more details and see https://www.notion.so/freeagent/Deployment-failures-8ef5762f707944a4b880a8970cf16132 for help identifying the issue.")
+                break
+              default:
+                core.error("Unknown status from Harness: ${parsedResponse.status}. Please check deployment link to see what happened and confirm everything's ok.")
+                break
+            }
+
+            console.log("finished polling")
         }
     }
 }
@@ -83,7 +139,8 @@ try {
     core.getInput('webhookUrl'),
     core.getInput('application'),
     core.getInput('version'),
-    core.getInput('services')
+    core.getInput('services'),
+    core.getInput('poll_for_deploy_completion')
   );
 
   harnessDeployment.start();
