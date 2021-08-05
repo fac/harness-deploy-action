@@ -2,11 +2,12 @@ const core = require('@actions/core');
 const github = require('@actions/github');
 
 class HarnessDeployment {
-    constructor(webhookUrl, application, version, services) {
+    constructor(webhookUrl, application, version, services, poll_for_deploy_completion) {
         this.webhookUrl = webhookUrl,
         this.application = application,
         this.version = version,
-        this.services = services
+        this.services = services,
+        this.poll_for_deploy_completion = poll_for_deploy_completion
     }
 
     start() {
