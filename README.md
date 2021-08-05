@@ -91,6 +91,8 @@ id.
 If the harness API returned an error, it will be in this output.
 ## Environment Variables
 
+HARNESS_API_KEY
+
 None.
 ## Authors
 
