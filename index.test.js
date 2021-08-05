@@ -1,4 +1,3 @@
-const core = require('@actions/core');
 let HarnessDeployment = require("./harness-deployment");
 jest.mock("./harness-deployment");
 
