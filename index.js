@@ -2,7 +2,6 @@ const core = require('@actions/core');
 const github = require('@actions/github');
 const http = require('https');
 
-// test change!
 function do_the_response(statusCode, data) {
   const { uiUrl, error } = data;
   core.setOutput("harness_url", uiUrl);
