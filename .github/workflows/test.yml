@@ -1,0 +1,46 @@
+name: "Run Test and Package Latest JS"
+
+on:
+  push:
+    branches:
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - run: npm ci
+    - run: npm test
+
+  check-latest-dist:
+    runs-on: ubuntu-latest
+    needs: [unit-tests]
+    steps:
+    - uses: actions/checkout@v2
+    - run: npm install
+    - run: yarn prepare
+      name: Compile javascript into the dist folder with ncc
+    - name: Check latest code is packaged in the dist folder
+      id: check-for-changes
+      run: |
+        if [ "$(git status --porcelain | wc -l)" -eq 0 ]
+        then
+          echo "::set-output name=CHANGES_TO_COMMIT::false"
+        else
+          echo "::group::Git diff to commit"
+          git diff
+          echo "::endgroup::"
+
+          echo "::set-output name=CHANGES_TO_COMMIT::true"
+        fi
+
+    - if: ${{ steps.check-for-changes.outputs.CHANGES_TO_COMMIT == 'true' }}
+      name: Commit and push latest dist changes
+      uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: Auto-update dist/index.js
+        file_pattern: dist/*
+
+    - if: ${{ steps.check-for-changes.outputs.CHANGES_TO_COMMIT == 'false' }}
+      name: No changes to commit
+      run: echo no changes to commit
