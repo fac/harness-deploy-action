@@ -49,6 +49,10 @@ class HarnessDeployment {
                 core.info("🚀 Deployment pipeline is now running on Harness")
             }
             core.info(`Harness deploy submitted, view at ${uiUrl}`)
+
+            if (this.poll_for_deploy_completion == 'true') {
+                this.pollForDeployCompletion();
+            }
         } else {
             if (error) {
                 core.error(`💣 Failed to start deployment: ${error}`)
@@ -58,6 +62,10 @@ class HarnessDeployment {
 
             core.setFailed(error || 'Unknown');
         }
+    }
+
+    pollForDeployCompletion() {
+        return true
     }
 }
 

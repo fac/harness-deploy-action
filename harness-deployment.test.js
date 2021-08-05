@@ -45,3 +45,40 @@ test('start() makes the correct POST request which is then procesed by do_the_re
     expect(mockSend).toHaveBeenCalledWith(testPayload);
     expect(mockDoTheResponse).toHaveBeenCalledWith(mockResponseStatus, mockResponse);
 });
+
+test('do_the_response when polling is enabled', () => {
+    const mockSend = jest.fn();
+    const mockOpen = jest.fn();
+    const mocksetRequestHeader = jest.fn();
+
+    const mockResponse = {
+        uiUrl: 'www.harness.io/example_url',
+        error: 'harnessError',
+        status: "RUNNING"
+    }
+    const mockResponseStatus = 200;
+
+    const xhrMockClass = () => ({
+        open: mockOpen,
+        send: mockSend,
+        setRequestHeader: mocksetRequestHeader,
+        responseText: JSON.stringify(mockResponse),
+        status: mockResponseStatus
+    });
+    XMLHttpRequest = jest.fn().mockImplementation(xhrMockClass)
+
+    const poll_for_deploy_completion = 'true';
+    const harnessDeployment = new HarnessDeployment(webhookUrl, application, version, services, poll_for_deploy_completion);
+
+    const testPayload = "{test payload}"
+    harnessDeployment.payload = jest.fn().mockReturnValue(testPayload)
+
+    const mockPollForDeployCompletion = jest.fn();
+    harnessDeployment.pollForDeployCompletion = mockPollForDeployCompletion
+
+    const req = harnessDeployment.start();
+
+    expect(mockSend).toHaveBeenCalledWith(testPayload);
+    expect(mockPollForDeployCompletion).toHaveBeenCalled();
+})
+
