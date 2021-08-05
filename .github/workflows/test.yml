@@ -22,7 +22,7 @@ jobs:
     - name: Check latest code is packaged in the dist folder
       id: check-for-changes
       run: |
-        if [ $(git status --porcelain | wc -l) -eq "0" ]; then
+        if [ "$(git status --porcelain | wc -l)" -eq "0" ]; then
           echo "::set-output name=CHANGES_TO_COMMIT::false"
         else
           echo "::group::Git diff to commit"
@@ -32,12 +32,12 @@ jobs:
           echo "::set-output name=CHANGES_TO_COMMIT::true"
         fi
 
-    - if: steps.check-for-changes.outputs.CHANGES_TO_COMMIT == 'true'
+    - if: ${{ steps.check-for-changes.outputs.CHANGES_TO_COMMIT == 'true' }}
       name: Commit and push latest dist changes
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
         commit_message: Auto-update dist/index.js
 
-    - if: steps.check-for-changes.outputs.CHANGES_TO_COMMIT == 'false'
+    - if: ${{ steps.check-for-changes.outputs.CHANGES_TO_COMMIT == 'false' }}
       name: No changes to commit
       run: echo no changes to commit
