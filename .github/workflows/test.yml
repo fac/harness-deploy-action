@@ -23,7 +23,8 @@ jobs:
     - name: Check latest code is packaged in the dist folder
       id: check-for-changes
       run: |
-        if [ "$(git status --porcelain | wc -l)" -eq "0" ]; then
+        if [ "$(git status --porcelain | wc -l)" -eq 0 ]
+        then
           echo "::set-output name=CHANGES_TO_COMMIT::false"
         else
           echo "::group::Git diff to commit"
