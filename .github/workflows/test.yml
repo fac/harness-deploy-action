@@ -39,6 +39,7 @@ jobs:
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
         commit_message: Auto-update dist/index.js
+        file_pattern: dist/*
 
     - if: ${{ steps.check-for-changes.outputs.CHANGES_TO_COMMIT == 'false' }}
       name: No changes to commit
