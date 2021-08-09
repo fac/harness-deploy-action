@@ -28,13 +28,13 @@ function do_the_response(statusCode, data) {
   }
 }
 
-try {
-  const webhookUrl  = core.getInput('webhookUrl');
+function sendHarnessDeployRequest() {
+  const webhookUrl = core.getInput('webhookUrl');
   const application = core.getInput('application');
-  const version     = core.getInput('version');
-  const services    = core.getInput('services');
+  const version = core.getInput('version');
+  const services = core.getInput('services');
 
-  const art = services.split(/\s*,\s*/).map(x => { return {service: x, buildNumber: version} });
+  const art = services.split(/\s*,\s*/).map(x => { return { service: x, buildNumber: version } });
   const payload = JSON.stringify({
     application: application,
     artifacts: art
@@ -64,6 +64,10 @@ try {
   });
   req.write(payload);
   req.end();
+}
+
+try {
+  sendHarnessDeployRequest();
 } catch (error) {
   core.setFailed(error.message);
 }

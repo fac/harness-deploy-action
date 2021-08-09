@@ -1,6 +1,19 @@
 {
+  "name": "harness-deploy-action",
+  "description": "Deploy to Harness with GitHub Action",
+  "main": "index.js",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "jest",
+    "prepare": "ncc build index.js -o dist --source-map --license licenses.txt"
+  },
   "dependencies": {
     "@actions/core": "^1.4.0",
     "@actions/github": "^5.0.0"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.27.0",
+    "eslint": "^7.4.0",
+    "jest": "^26.6.3"
   }
 }
