@@ -2,8 +2,8 @@ const core = require('@actions/core');
 const http = require('https');
 
 function do_the_response(statusCode, data) {
-  const { uiUrl, error } = data;
-  core.setOutput("harness_url", uiUrl);
+  const { harness_url, error } = data;
+  core.setOutput("harness_url", harness_url);
   core.setOutput("error", error);
 
   const request_success = [200, 201, 400].includes( statusCode );
@@ -15,7 +15,7 @@ function do_the_response(statusCode, data) {
     } else {
       core.info("🚀 Deployment pipeline is now running on Harness")
     }
-    core.info(`Harness deploy submitted, view at ${uiUrl}`)
+    core.info(`Harness deploy submitted, view at ${harness_url}`)
   } else {
     if ( error ) {
       core.error(`💣 Failed to start deployment: ${error}`)
