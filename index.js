@@ -27,12 +27,7 @@ function do_the_response(statusCode, data) {
   }
 }
 
-export function sendHarnessDeployRequest() {
-  const webhookUrl = core.getInput('webhookUrl');
-  const application = core.getInput('application');
-  const version = core.getInput('version');
-  const services = core.getInput('services');
-
+export function sendHarnessDeployRequest(webhookUrl, application, version, services) {
   const artifacts = services.split(/\s*,\s*/).map(x => { return { service: x, buildNumber: version } });
   const request_body = JSON.stringify({
     application,
