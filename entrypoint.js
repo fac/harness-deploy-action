@@ -1,5 +1,7 @@
 const core = require('@actions/core');
-const index = require('./index.js')
+const {
+  sendHarnessDeployRequest,
+  makeHarnessDeployRequestPayload } = require('./index.js')
 
 try {
   const webhookUrl = core.getInput('webhookUrl');
@@ -7,7 +9,11 @@ try {
   const version = core.getInput('version');
   const services = core.getInput('services');
 
-  index.sendHarnessDeployRequest(webhookUrl, application, version, services);
+  console.log(`Deploying application:${application} (${services}) at ${version}`)
+  sendHarnessDeployRequest(
+    webhookUrl,
+    makeHarnessDeployRequestPayload(application, version, services)
+  );
 } catch (error) {
   core.setFailed(error.message);
 }

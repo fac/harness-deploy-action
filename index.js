@@ -27,14 +27,15 @@ function do_the_response(statusCode, data) {
   }
 }
 
-export function sendHarnessDeployRequest(webhookUrl, application, version, services) {
+export function makeHarnessDeployRequestPayload(application, version, services) {
   const artifacts = services.split(/\s*,\s*/).map(x => { return { service: x, buildNumber: version } });
-  const request_body = JSON.stringify({
+  return JSON.stringify({
     application,
     artifacts
   }, undefined, 2);
+}
 
-  console.log(`Deploying application:${application} (${services}) at ${version}`)
+export function sendHarnessDeployRequest(webhookUrl, request_body) {
   const opts = {
     method: 'POST',
     headers: {
