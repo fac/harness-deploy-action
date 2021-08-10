@@ -34,7 +34,7 @@ export function sendHarnessDeployRequest() {
   const services = core.getInput('services');
 
   const artifacts = services.split(/\s*,\s*/).map(x => { return { service: x, buildNumber: version } });
-  const payload = JSON.stringify({
+  const request_body = JSON.stringify({
     application,
     artifacts
   }, undefined, 2);
@@ -61,6 +61,6 @@ export function sendHarnessDeployRequest() {
       do_the_response(res.statusCode, JSON.parse(body));
     });
   });
-  req.write(payload);
+  req.write(request_body);
   req.end();
 }
