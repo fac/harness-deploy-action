@@ -27,7 +27,7 @@ function do_the_response(statusCode, data) {
   }
 }
 
-function sendHarnessDeployRequest() {
+export function sendHarnessDeployRequest() {
   const webhookUrl = core.getInput('webhookUrl');
   const application = core.getInput('application');
   const version = core.getInput('version');
@@ -63,10 +63,4 @@ function sendHarnessDeployRequest() {
   });
   req.write(payload);
   req.end();
-}
-
-try {
-  sendHarnessDeployRequest();
-} catch (error) {
-  core.setFailed(error.message);
 }
