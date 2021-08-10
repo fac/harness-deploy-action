@@ -1,5 +1,4 @@
 const core = require('@actions/core');
-const github = require('@actions/github');
 const http = require('https');
 
 function do_the_response(statusCode, data) {
