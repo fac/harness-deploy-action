@@ -35,9 +35,9 @@ export function sendHarnessDeployRequest() {
 
   const artifacts = services.split(/\s*,\s*/).map(x => { return { service: x, buildNumber: version } });
   const payload = JSON.stringify({
-    application: application,
-    artifacts: artifacts
-  }, undefined, 2)
+    application,
+    artifacts
+  }, undefined, 2);
 
   console.log(`Deploying application:${application} (${services}) at ${version}`)
   const opts = {
