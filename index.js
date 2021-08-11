@@ -35,7 +35,8 @@ export function makeHarnessDeployRequestPayload(application, version, services) 
   }, undefined, 2);
 }
 
-export function sendHarnessDeployRequest(webhookUrl, request_body) {
+export function sendHarnessDeployRequest(webhookUrl, application, version, services) {
+  const request_body = makeHarnessDeployRequestPayload(application, version, services);
   const opts = {
     method: 'POST',
     headers: {
