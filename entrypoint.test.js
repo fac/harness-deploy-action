@@ -5,6 +5,7 @@ test('runs the action', () => {
     process.env['INPUT_SERVICES'] = 'pin, cush ,ion';
     process.env['INPUT_WEBHOOKURL'] = 'https://example.com/harness/webhook';
     process.env['INPUT_VERSION'] = 'v0';
+    process.env['INPUT_WAITFORDEPLOY'] = 'false';
 
     const action = require('./entrypoint');
 

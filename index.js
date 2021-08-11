@@ -63,3 +63,6 @@ export function sendHarnessDeployRequest(webhookUrl, application, version, servi
   promise.then(([statusCode, data]) => checkHarnessDeployResponse(statusCode, output));
   return promise;
 }
+
+export function watchDeployment(api_url, harness_api_key) {
+}
