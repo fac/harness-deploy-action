@@ -40,21 +40,26 @@ export function sendHarnessDeployRequest(webhookUrl, application, version, servi
       'Content-Type': 'application/json',
     }
   }
-  const req = http.request(webhookUrl, opts, (res) => {
-    var body = ""
-    res.setEncoding('utf8');
-    res.on('error', (err) => {
-      console.log(`ERROR: ${err}`);
-      core.setFailed(err);
+  const promise = new Promise((resolve, reject) => {
+
+    const req = http.request(webhookUrl, opts, (res) => {
+      var body = ""
+      res.setEncoding('utf8');
+      res.on('error', (err) => {
+        console.log(`ERROR: ${err}`);
+        reject(err);
+      });
+      res.on('data', (chunk) => {
+        body += chunk
+      });
+      res.on('end', () => {
+        console.log(`BODY:${body}`);
+        resolve([res.statusCode, JSON.parse(body)]);
+      });
     });
-    res.on('data', (chunk) => {
-      body += chunk
-    });
-    res.on('end', () => {
-      console.log(`BODY:${body}`);
-      checkHarnessDeployResponse(res.statusCode, JSON.parse(body));
-    });
+    req.write(request_body);
+    req.end();
   });
-  req.write(request_body);
-  req.end();
+  promise.then(([statusCode, data]) => checkHarnessDeployResponse(statusCode, output));
+  return promise;
 }
