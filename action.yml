@@ -19,7 +19,7 @@ outputs:
   harness_url:
     description: URL to find and watch the deploy
   error:
-    description: JSON error message from the API incase of failure.
+    description: JSON error message from the API in case of failure.
 
 runs:
   using: 'node12'
