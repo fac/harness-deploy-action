@@ -1,30 +1,27 @@
-const core = require('@actions/core');
 const http = require('https');
 
-function do_the_response(statusCode, data) {
-  const { harness_url, error } = data;
-  core.setOutput("harness_url", harness_url);
-  core.setOutput("error", error);
+export function checkHarnessDeployResponse(statusCode, data) {
+  const { api_url, harness_url, error } = data;
+  return new Promise((resolve, reject) => {
+    const request_success = [200, 201, 400].includes( statusCode );
+    const deploy_success = ['QUEUED', 'RUNNING', 'PAUSED'].includes( data.status );
 
-  const request_success = [200, 201, 400].includes( statusCode );
-  const deploy_success = ['QUEUED', 'RUNNING', 'PAUSED'].includes( data.status );
-
-  if ( request_success && deploy_success ) {
-    if ( data.status == 'PAUSED' ) {
-      core.info("⚠️ Waiting for approval to start the deployment pipeline on Harness")
+    var info_message;
+    if ( request_success && deploy_success ) {
+      if ( data.status == 'PAUSED' ) {
+        info_message = "⚠️ Waiting for approval to start the deployment pipeline on Harness";
+      } else {
+        info_message = "🚀 Deployment pipeline is now running on Harness";
+      }
+      resolve([harness_url, api_url, [info_message, `Harness deploy submitted, view at ${harness_url}`]]);
     } else {
-      core.info("🚀 Deployment pipeline is now running on Harness")
+      if ( error ) {
+        reject([error, `💣 Failed to start deployment: ${error}`]);
+      } else {
+        reject([error, `💣 Deployment pipeline state is ${data.status}, check the health through the Harness website.`]);
+      }
     }
-    core.info(`Harness deploy submitted, view at ${harness_url}`)
-  } else {
-    if ( error ) {
-      core.error(`💣 Failed to start deployment: ${error}`)
-    } else {
-      core.error(`💣 Deployment pipeline state is ${data.status}, check the health through the Harness website.`)
-    }
-
-    core.setFailed(error || 'Unknown');
-  }
+  });
 }
 
 export function makeHarnessDeployRequestPayload(application, version, services) {
@@ -55,7 +52,7 @@ export function sendHarnessDeployRequest(webhookUrl, application, version, servi
     });
     res.on('end', () => {
       console.log(`BODY:${body}`);
-      do_the_response(res.statusCode, JSON.parse(body));
+      checkHarnessDeployResponse(res.statusCode, JSON.parse(body));
     });
   });
   req.write(request_body);
