@@ -1,4 +1,4 @@
-const http = require('https');
+const axios = require('axios').default;
 
 export function checkHarnessDeployResponse(statusCode, data) {
   const { api_url, harness_url, error } = data;
@@ -34,34 +34,8 @@ export function makeHarnessDeployRequestPayload(application, version, services) 
 
 export function sendHarnessDeployRequest(webhookUrl, application, version, services) {
   const request_body = makeHarnessDeployRequestPayload(application, version, services);
-  const opts = {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    }
-  }
-  const promise = new Promise((resolve, reject) => {
-
-    const req = http.request(webhookUrl, opts, (res) => {
-      var body = ""
-      res.setEncoding('utf8');
-      res.on('error', (err) => {
-        console.log(`ERROR: ${err}`);
-        reject(err);
-      });
-      res.on('data', (chunk) => {
-        body += chunk
-      });
-      res.on('end', () => {
-        console.log(`BODY:${body}`);
-        resolve([res.statusCode, JSON.parse(body)]);
-      });
-    });
-    req.write(request_body);
-    req.end();
-  });
-  promise.then(([statusCode, data]) => checkHarnessDeployResponse(statusCode, output));
-  return promise;
+  const request = axios.post(webhookUrl, request_body);
+  return request.then((response) => checkHarnessDeployResponse(response.status, response.data));
 }
 
 export function watchDeployment(api_url, harness_api_key) {
