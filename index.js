@@ -49,7 +49,7 @@ export function sendHarnessDeployRequest(webhookUrl, application, version, servi
 }
 
 export function watchDeployment(api_url, harness_api_key, options={}) {
-  const { waitBetween } = Object.assign({ waitBetween: 10 }, options);
+  const { waitBetween, timeLimit } = Object.assign({ waitBetween: 10, timeLimit: 1200 }, options);
   const retry_statuses = [408, 429, 503];
   const client = axios.create({
     maxRedirects: 0,
@@ -101,5 +101,5 @@ export function watchDeployment(api_url, harness_api_key, options={}) {
       }
     )
   }
-  return poll();
+  return Promise.race([poll(), sleep(timeLimit).then(() => Promise.reject(`time limit of ${timeLimit} hit!`))]);
 }

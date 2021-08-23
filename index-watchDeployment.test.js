@@ -23,6 +23,27 @@ test('polls', () => {
 
 });
 
+test('polling times out', () => {
+    const http_mock = new MockAdapter(axios);
+
+    http_mock.onGet('https://example.org/api')
+    .replyOnce(200, {
+      status: 'RUNNING',
+    })
+    .onGet('https://example.org/api')
+    .replyOnce(200, {
+      status: 'RUNNING',
+    })
+    .onGet('https://example.org/api')
+    .replyOnce(200, {
+      status: 'SUCCESS',
+    });
+
+    return expect(
+      index.watchDeployment('https://example.org/api', 'HARNESS_TEST_API_KEY', { waitBetween: 2, timeLimit: 3 })
+    ).rejects.toEqual('time limit of 3 hit!');
+});
+
 test('polling ends when deployment failed', () => {
     const http_mock = new MockAdapter(axios);
 
