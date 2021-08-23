@@ -38,8 +38,8 @@ export function sendHarnessDeployRequest(webhookUrl, application, version, servi
   return request.then((response) => checkHarnessDeployResponse(response.status, response.data));
 }
 
-export function watchDeployment(api_url, harness_api_key) {
-  const waitBetween = 10;
+export function watchDeployment(api_url, harness_api_key, options={}) {
+  const { waitBetween } = Object.assign({ waitBetween: 10 }, options);
   const retry_statuses = [408, 429, 503];
   const client = axios.create({
     maxRedirects: 0,
