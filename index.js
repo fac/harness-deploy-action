@@ -13,12 +13,22 @@ export function checkHarnessDeployResponse(statusCode, data) {
       } else {
         info_message = "🚀 Deployment pipeline is now running on Harness";
       }
-      resolve([harness_url, api_url, [info_message, `Harness deploy submitted, view at ${harness_url}`]]);
+      resolve({
+        harness_url,
+        api_url,
+        messages: [info_message, `Harness deploy submitted, view at ${harness_url}`],
+      });
     } else {
       if ( error ) {
-        reject([error, `💣 Failed to start deployment: ${error}`]);
+        reject({
+          error,
+          message: `💣 Failed to start deployment: ${error}`,
+        });
       } else {
-        reject([error, `💣 Deployment pipeline state is ${data.status}, check the health through the Harness website.`]);
+        reject({
+          error,
+          message: `💣 Deployment pipeline state is ${data.status}, check the health through the Harness website.`,
+         });
       }
     }
   });
