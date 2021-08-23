@@ -37,7 +37,9 @@ test('polling ends when deployment failed', () => {
 
     return expect(
       index.watchDeployment('https://example.org/api', 'HARNESS_TEST_API_KEY', { waitBetween: 0.1 })
-    ).rejects.toMatch('Deployment has failed');
+    ).rejects.toMatchObject({
+      message: expect.stringContaining('Deployment has failed'),
+    });
 });
 
 test('polling ends when deployment aborted', () => {
@@ -54,7 +56,10 @@ test('polling ends when deployment aborted', () => {
 
     return expect(
       index.watchDeployment('https://example.org/api', 'HARNESS_TEST_API_KEY', { waitBetween: 0.1 })
-    ).rejects.toMatch('Deployment was aborted');
+    ).rejects.toMatchObject({
+      error: 'ABORTED',
+      message: expect.stringContaining('Deployment was aborted'),
+    });
 });
 
 test('polling ends when deployment rejected', () => {
@@ -71,7 +76,10 @@ test('polling ends when deployment rejected', () => {
 
     return expect(
       index.watchDeployment('https://example.org/api', 'HARNESS_TEST_API_KEY', { waitBetween: 0.1 })
-    ).rejects.toMatch('Deployment was rejected');
+    ).rejects.toMatchObject({
+      error: 'REJECTED',
+      message: expect.stringContaining('Deployment was rejected'),
+    });
 });
 
 test('polling ends when status is unknown', () => {
@@ -88,7 +96,10 @@ test('polling ends when status is unknown', () => {
 
     return expect(
       index.watchDeployment('https://example.org/api', 'HARNESS_TEST_API_KEY', { waitBetween: 0.1 })
-    ).rejects.toMatch('Unknown status from Harness: UH OH.');
+    ).rejects.toMatchObject({
+      error: 'UH OH',
+      message: expect.stringContaining('Unknown status from Harness: UH OH.'),
+    });
 });
 
 test('polling ends when unexpected HTTP status in response', () => {

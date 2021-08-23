@@ -61,27 +61,43 @@ export function watchDeployment(api_url, harness_api_key, options={}) {
   function poll() {
     return client.get(api_url).then(
       (fulfillment) => {
-        switch(fulfillment.data.status) {
+        const deployment_status = fulfillment.data.status;
+        switch(deployment_status) {
           case 'RUNNING':
           case 'QUEUED':
             return sleep(waitBetween).then(poll);
           case 'SUCCESS':
             return '🎉 Deployment succeeded'
           case 'ABORTED':
-            return Promise.reject('🛑 Deployment was aborted or cancelled');
+            return Promise.reject({
+              error: deployment_status,
+              message: '🛑 Deployment was aborted or cancelled',
+            });
           case 'REJECTED':
-            return Promise.reject('🛑 Deployment was rejected');
+            return Promise.reject({
+              error: deployment_status,
+              message: '🛑 Deployment was rejected',
+            });
           case 'FAILED':
-            return Promise.reject('💣 Deployment has failed. Check the Harness link for more details and see https://www.notion.so/freeagent/Deployment-failures-8ef5762f707944a4b880a8970cf16132 for help identifying the issue.');
+            return Promise.reject({
+              error: deployment_status,
+              message: '💣 Deployment has failed. Check the Harness link for more details and see https://www.notion.so/freeagent/Deployment-failures-8ef5762f707944a4b880a8970cf16132 for help identifying the issue.',
+            });
           default:
-            return Promise.reject(`Unknown status from Harness: ${fulfillment.data.status}. Please check deployment link to see what happened and confirm everything's ok.`);
+            return Promise.reject({
+              error: deployment_status,
+              message: `Unknown status from Harness: ${deployment_status}. Please check deployment link to see what happened and confirm everything's ok.`,
+            });
+          // end of switch
         }
       },
       (rejection) => {
         if ( retry_statuses.includes(rejection.response.status) ) {
           return sleep(waitBetween).then(poll);
         }
-        return Promise.reject(`Unexpected HTTP status ${rejection.response.status}`);
+        return Promise.reject({
+          error: `Unexpected HTTP status ${rejection.response.status}`,
+        });
       }
     )
   }
