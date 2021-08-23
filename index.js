@@ -39,4 +39,41 @@ export function sendHarnessDeployRequest(webhookUrl, application, version, servi
 }
 
 export function watchDeployment(api_url, harness_api_key) {
+  const waitBetween = 10;
+  const retry_statuses = [408, 429, 503];
+  const client = axios.create({
+    maxRedirects: 0,
+    headers: { 'X-Api-Key': harness_api_key }
+  });
+  function sleep(seconds) {
+    return new Promise(resolve => setTimeout(resolve, seconds*1000));
+  }
+  function poll() {
+    return client.get(api_url).then(
+      (fulfillment) => {
+        switch(fulfillment.data.status) {
+          case 'RUNNING':
+          case 'QUEUED':
+            return sleep(waitBetween).then(poll);
+          case 'SUCCESS':
+            return '🎉 Deployment succeeded'
+          case 'ABORTED':
+            return Promise.reject('🛑 Deployment was aborted or cancelled');
+          case 'REJECTED':
+            return Promise.reject('🛑 Deployment was rejected');
+          case 'FAILED':
+            return Promise.reject('💣 Deployment has failed. Check the Harness link for more details and see https://www.notion.so/freeagent/Deployment-failures-8ef5762f707944a4b880a8970cf16132 for help identifying the issue.');
+          default:
+            return Promise.reject(`Unknown status from Harness: ${fulfillment.data.status}. Please check deployment link to see what happened and confirm everything's ok.`);
+        }
+      },
+      (rejection) => {
+        if ( retry_statuses.includes(rejection.response.status) ) {
+          return sleep(waitBetween).then(poll);
+        }
+        return Promise.reject(`Unexpected HTTP status ${rejection.response.status}`);
+      }
+    )
+  }
+  return poll();
 }
