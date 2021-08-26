@@ -15,6 +15,8 @@ Call the [Harness.io](https://harness.io/) API to deploy an application.
        application: XYZ12345678ABC
        services: web,console,job
        version: ${{ github.sha }}
+       waitForDeploy: false # optional
+       harnessApiKey: abcd # only required when waitForDeploy is true
 
    - name: Deploy Link
      run: |
@@ -30,7 +32,7 @@ Actions are run from GitHub repos.  Packaging the action will create a packaged 
 Run prepare
 
 ```bash
-npm run prepare
+yarn run prepare
 ```
 
 Since the packaged index.js is run from the dist folder.
@@ -46,7 +48,7 @@ git add dist
 Run tests using
 
 ```bash
-npm run test
+yarn run test
 ````
 
 Tests are also run in an action on GitHub.
