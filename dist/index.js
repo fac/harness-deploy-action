@@ -4388,9 +4388,15 @@ let makeHarnessDeployRequestPayload = function(application, version, services) {
   }, undefined, 2);
 }
 
+let axiosConfig = {
+  headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+  }
+};
+
 let sendHarnessDeployRequest = function(webhookUrl, application, version, services) {
   const request_body = makeHarnessDeployRequestPayload(application, version, services);
-  const request = axios.post(webhookUrl, request_body);
+  const request = axios.post(webhookUrl, request_body, axiosConfig);
 
   return request.then((response) => checkHarnessDeployResponse(response.status, response.data));
 }
