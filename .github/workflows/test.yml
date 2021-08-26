@@ -36,7 +36,7 @@ jobs:
 
     - if: ${{ steps.check-for-changes.outputs.CHANGES_TO_COMMIT == 'true' }}
       run: |
-        echo run yarn install && yarn prepare locally and commit the updates from the dist folder
+        echo "run yarn install && yarn prepare locally and commit the updates from the dist folder"
         exit 1
 
     - if: ${{ steps.check-for-changes.outputs.CHANGES_TO_COMMIT == 'false' }}
