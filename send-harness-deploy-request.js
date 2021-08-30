@@ -49,6 +49,9 @@ let makeHarnessDeployRequestPayload = function(application, version, services) {
 let axiosConfig = {
   headers: {
       'Content-Type': 'application/json;charset=UTF-8'
+  },
+  validateStatus: function (status) {
+    return [200, 201, 400].includes( status );
   }
 };
 
