@@ -4345,6 +4345,8 @@ module.exports = {
 const axios = __nccwpck_require__(6545).default;
 
 let checkHarnessDeployResponse = function(statusCode, data) {
+  console.log(statusCode, data);
+
   const { api_url, harness_url, error } = data;
 
   return new Promise((resolve, reject) => {
@@ -4428,6 +4430,8 @@ let watchDeployment = function(api_url, harness_api_key, options = {}) {
   function poll() {
     return client.get(api_url).then(
       (fulfillment) => {
+        console.log(fulfillment);
+
         const deployment_status = fulfillment.data.status;
         switch (deployment_status) {
           case "RUNNING":
@@ -4459,6 +4463,8 @@ let watchDeployment = function(api_url, harness_api_key, options = {}) {
         }
       },
       (rejection) => {
+        console.log(rejection);
+
         if (retry_statuses.includes(rejection.response.status)) {
           return sleep(waitBetween).then(poll);
         }
