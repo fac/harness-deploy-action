@@ -56,7 +56,9 @@ let watchDeployment = function(api_url, harness_api_key, options = {}) {
           error: `Unexpected HTTP status ${rejection.response.status}`,
         });
       }
-    );
+    ).catch((error) => {
+      console.log(error);
+    });
   }
 
   return Promise.race([
