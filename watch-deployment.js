@@ -18,6 +18,8 @@ let watchDeployment = function(api_url, harness_api_key, options = {}) {
   function poll() {
     return client.get(api_url).then(
       (fulfillment) => {
+        console.log(fulfillment);
+
         const deployment_status = fulfillment.data.status;
         switch (deployment_status) {
           case "RUNNING":
@@ -49,6 +51,8 @@ let watchDeployment = function(api_url, harness_api_key, options = {}) {
         }
       },
       (rejection) => {
+        console.log(rejection);
+
         if (retry_statuses.includes(rejection.response.status)) {
           return sleep(waitBetween).then(poll);
         }

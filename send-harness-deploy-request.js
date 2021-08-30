@@ -1,6 +1,8 @@
 const axios = require('axios').default;
 
 let checkHarnessDeployResponse = function(statusCode, data) {
+  console.log(statusCode, data);
+
   const { api_url, harness_url, error } = data;
 
   return new Promise((resolve, reject) => {
