@@ -1,6 +1,8 @@
 const axios = require("axios");
 const MockAdapter = require("axios-mock-adapter");
 
+const { watchDeployment } = require("./watch-deployment.js");
+
 describe("the JS entrypoint to the GitHub action", () => {
   test("runs the action", () => {
     expect.assertions(1);
@@ -25,7 +27,7 @@ describe("the JS entrypoint to the GitHub action", () => {
       message: null,
     });
 
-    const entrypoint = require(".");
+    const entrypoint = require("./index.js");
 
     expect(consoleSpy).toHaveBeenCalledWith(
       "Deploying application:pincushion (pin, cush ,ion) at v0"
@@ -35,6 +37,7 @@ describe("the JS entrypoint to the GitHub action", () => {
     expect.assertions(1);
 
     const consoleSpy = jest.spyOn(console, "log");
+    const watchDeploymentMock = jest.fn();
 
     process.env["INPUT_APPLICATION"] = "pincushion";
     process.env["INPUT_SERVICES"] = "pin, cush ,ion";
@@ -54,10 +57,10 @@ describe("the JS entrypoint to the GitHub action", () => {
       message: null,
     });
 
-    const entrypoint = require(".");
+    const entrypoint = require("./index.js");
 
     expect(consoleSpy).toHaveBeenCalledWith(
-      "Deploying application:pincushion (pin, cush ,ion) at v0"
+      "sending request to start deployment"
     );
   });
 });

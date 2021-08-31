@@ -15,19 +15,18 @@ sendHarnessDeployRequest(webhookUrl, application, version, services)
   .then((response) => {
     const responseData = response.responseData;
     const messages = response.messages;
-    debugger;
-    core.setOutput("harness_url", responseData.uiUrl);
-    core.setOutput("harness_api_url", responseData.apiUrl);
+
     messages.forEach((msg) => {
       core.info(msg);
     });
 
     if (waitForDeploy) {
-      console.log("watching deployment");
-      watchDeployment(apiUrl, harnessApiKey);
+      console.log("watching deployment from apiUrl");
+      console.log(apiUrl);
+      watchDeployment(response.data.apiUrl, harnessApiKey);
     }
 
-    return responseData.apiUrl;
+    core.setOutput("harness_url", response.data.uiUrl);
   })
   .catch(({ error, message }) => {
     core.setOutput("error", error);
