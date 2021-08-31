@@ -4351,8 +4351,7 @@ module.exports = {
 const axios = __nccwpck_require__(6545).default;
 
 let checkHarnessDeployResponse = function (statusCode, data) {
-  console.log("checking response from request to start deployment");
-  console.log(statusCode, data);
+  console.log("Checking response from request to start deployment");
 
   const { requestId, status, error, uiUrl, apiUrl, message } = data;
 
@@ -4431,7 +4430,7 @@ let sendHarnessDeployRequest = function (
     services
   );
 
-  console.log("sending request to start deployment");
+  console.log("Sending request to start deployment");
   const request = axios.post(webhookUrl, request_body, axiosConfig);
 
   return request.then((response) =>
@@ -4454,7 +4453,7 @@ module.exports = {
 const axios = __nccwpck_require__(6545).default;
 
 let watchDeployment = function (api_url, harness_api_key, options = {}) {
-  console.log("watching deployment");
+  console.log("Watching deployment");
 
   const { waitBetween, timeLimit } = Object.assign(
     { waitBetween: 10, timeLimit: 1200 },
@@ -4481,10 +4480,12 @@ let watchDeployment = function (api_url, harness_api_key, options = {}) {
       })
       .then(function (response) {
         // handle API GET request success
-        console.log("polling response success");
-        console.log(response);
+        console.log(`Deploy status: ${response.data.status}`);
 
         if (retry_statuses.includes(response.status)) {
+          console.log(
+            `Response HTTP status: ${response.status}, retrying poll..`
+          );
           return sleep(waitBetween).then(poll);
         }
 
@@ -4520,7 +4521,7 @@ let watchDeployment = function (api_url, harness_api_key, options = {}) {
       })
       .catch(function (error) {
         // handle error
-        console.log("polling response error");
+        console.log("polling response error:");
         console.log(error);
 
         return Promise.reject({
