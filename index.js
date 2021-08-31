@@ -13,6 +13,8 @@ console.log(`Deploying application:${application} (${services}) at ${version}`);
 
 sendHarnessDeployRequest(webhookUrl, application, version, services)
   .then((response) => {
+    console.log("response from sendHarnessDeployRequest is:");
+    console.log(response);
     const responseData = response.responseData;
     const messages = response.messages;
 
@@ -22,7 +24,7 @@ sendHarnessDeployRequest(webhookUrl, application, version, services)
 
     if (waitForDeploy) {
       console.log("watching deployment from apiUrl");
-      console.log(apiUrl);
+      console.log(response.data.apiUrl);
       watchDeployment(response.data.apiUrl, harnessApiKey);
     }
 
