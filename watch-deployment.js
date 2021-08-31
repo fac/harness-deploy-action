@@ -1,8 +1,6 @@
 const axios = require("axios").default;
 
 let watchDeployment = function (api_url, harness_api_key, options = {}) {
-  console.log("Watching deployment");
-
   const { waitBetween, timeLimit } = Object.assign(
     { waitBetween: 10, timeLimit: 1200 },
     options
@@ -18,7 +16,6 @@ let watchDeployment = function (api_url, harness_api_key, options = {}) {
   }
 
   function poll() {
-    console.log("polling...");
     return client
       .get(api_url, {
         validateStatus: function (status) {
