@@ -1,7 +1,12 @@
 const axios = require("axios").default;
 const core = require("@actions/core");
 
-let watchDeployment = function (api_url, harness_api_key, options = {}) {
+let watchDeployment = function (
+  harness_api_url,
+  harness_ui_url,
+  harness_api_key,
+  options = {}
+) {
   const { waitBetween, timeLimit } = Object.assign(
     { waitBetween: 10, timeLimit: 1200 },
     options
@@ -17,8 +22,10 @@ let watchDeployment = function (api_url, harness_api_key, options = {}) {
   }
 
   function poll() {
+    core.info(`Watch Harness deploy at: ${harness_ui_url}`);
+
     return client
-      .get(api_url, {
+      .get(harness_api_url, {
         validateStatus: function (status) {
           const validateStatuses = retry_statuses.concat([200]);
           return validateStatuses.includes(status);

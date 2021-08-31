@@ -24,7 +24,7 @@ sendHarnessDeployRequest(webhookUrl, application, version, services)
 
     if (waitForDeploy) {
       core.info("Polling for Harness deploy status:");
-      watchDeployment(response.data.apiUrl, harnessApiKey);
+      watchDeployment(response.data.apiUrl, response.data.uiUrl, harnessApiKey);
     }
 
     core.setOutput("harness_url", response.data.uiUrl);
