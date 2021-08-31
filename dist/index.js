@@ -31,7 +31,7 @@ sendHarnessDeployRequest(webhookUrl, application, version, services)
 
     if (waitForDeploy) {
       core.info("Polling for Harness deploy status:");
-      watchDeployment(response.data.apiUrl, harnessApiKey);
+      watchDeployment(response.data.apiUrl, response.data.uiUrl, harnessApiKey);
     }
 
     core.setOutput("harness_url", response.data.uiUrl);
@@ -4453,7 +4453,12 @@ module.exports = {
 const axios = __nccwpck_require__(6545).default;
 const core = __nccwpck_require__(2186);
 
-let watchDeployment = function (api_url, harness_api_key, options = {}) {
+let watchDeployment = function (
+  harness_api_url,
+  harness_ui_url,
+  harness_api_key,
+  options = {}
+) {
   const { waitBetween, timeLimit } = Object.assign(
     { waitBetween: 10, timeLimit: 1200 },
     options
@@ -4469,8 +4474,10 @@ let watchDeployment = function (api_url, harness_api_key, options = {}) {
   }
 
   function poll() {
+    core.info(`Watch Harness deploy at: ${harness_ui_url}`);
+
     return client
-      .get(api_url, {
+      .get(harness_api_url, {
         validateStatus: function (status) {
           const validateStatuses = retry_statuses.concat([200]);
           return validateStatuses.includes(status);
