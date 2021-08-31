@@ -22,6 +22,7 @@ sendHarnessDeployRequest(webhookUrl, application, version, services)
   })
   .then((apiUrl) => {
     if (waitForDeploy) {
+      console.log("watching deployment");
       watchDeployment(apiUrl, harnessApiKey);
     }
   })

@@ -1,6 +1,7 @@
 const axios = require('axios').default;
 
 let checkHarnessDeployResponse = function (statusCode, data) {
+  console.log("checking response from request to start deployment");
   console.log(statusCode, data);
 
   const { requestId, status, error, uiUrl, apiUrl, message } = data;
@@ -79,6 +80,8 @@ let sendHarnessDeployRequest = function (
     version,
     services
   );
+
+  console.log("sending request to start deployment");
   const request = axios.post(webhookUrl, request_body, axiosConfig);
 
   return request.then((response) =>

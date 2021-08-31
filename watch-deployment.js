@@ -1,6 +1,8 @@
 const axios = require("axios").default;
 
-let watchDeployment = function(api_url, harness_api_key, options = {}) {
+let watchDeployment = function (api_url, harness_api_key, options = {}) {
+  console.log("watching deployment");
+
   const { waitBetween, timeLimit } = Object.assign(
     { waitBetween: 10, timeLimit: 1200 },
     options
@@ -16,6 +18,7 @@ let watchDeployment = function(api_url, harness_api_key, options = {}) {
   }
 
   function poll() {
+    console.log("polling...");
     return client
       .get(api_url, {
         validateStatus: function (status) {
@@ -24,7 +27,8 @@ let watchDeployment = function(api_url, harness_api_key, options = {}) {
         },
       })
       .then(function (response) {
-        // handle success
+        // handle API GET request success
+        console.log("polling response success");
         console.log(response);
 
         if (retry_statuses.includes(response.status)) {
@@ -62,8 +66,8 @@ let watchDeployment = function(api_url, harness_api_key, options = {}) {
         }
       })
       .catch(function (error) {
-        return error;
         // handle error
+        console.log("polling response error");
         console.log(error);
 
         return Promise.reject({
@@ -78,6 +82,6 @@ let watchDeployment = function(api_url, harness_api_key, options = {}) {
       Promise.reject(`Time limit of ${timeLimit} hit!`)
     ),
   ]);
-}
+};
 
 module.exports = { watchDeployment };
