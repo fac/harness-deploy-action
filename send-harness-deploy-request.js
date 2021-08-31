@@ -21,8 +21,7 @@ let checkHarnessDeployResponse = function (statusCode, data) {
       }
 
       resolve({
-        uiUrl,
-        apiUrl,
+        data,
         messages: [info_message, `Harness deploy submitted, view at ${uiUrl}`],
       });
     } else {
