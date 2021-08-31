@@ -12,19 +12,22 @@ const waitForDeploy = core.getBooleanInput("waitForDeploy");
 console.log(`Deploying application:${application} (${services}) at ${version}`);
 
 sendHarnessDeployRequest(webhookUrl, application, version, services)
-  .then(({ responseData, messages }) => {
+  .then((response) => {
+    const responseData = response.responseData;
+    const messages = response.messages;
+    debugger;
     core.setOutput("harness_url", responseData.uiUrl);
     core.setOutput("harness_api_url", responseData.apiUrl);
     messages.forEach((msg) => {
       core.info(msg);
     });
-    return responseData.apiUrl;
-  })
-  .then((apiUrl) => {
+
     if (waitForDeploy) {
       console.log("watching deployment");
       watchDeployment(apiUrl, harnessApiKey);
     }
+
+    return responseData.apiUrl;
   })
   .catch(({ error, message }) => {
     core.setOutput("error", error);
