@@ -23,11 +23,10 @@ describe("watchDeployment", () => {
       });
 
     return watchDeployment("https://example.org/api", "HARNESS_TEST_API_KEY", {
-        waitBetween: 0.1,
-      })
-      .then((result) => {
-        expect(result).toBe("🎉 Deployment succeeded");
-      });
+      waitBetween: 0.1,
+    }).then((result) => {
+      expect(result).toBe("🎉 Deployment succeeded");
+    });
   });
 
   test("polling hitting the timeout", () => {

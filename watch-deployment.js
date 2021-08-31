@@ -16,11 +16,22 @@ let watchDeployment = function(api_url, harness_api_key, options = {}) {
   }
 
   function poll() {
-    return client.get(api_url).then(
-      (fulfillment) => {
-        console.log(fulfillment);
+    return client
+      .get(api_url, {
+        validateStatus: function (status) {
+          const validateStatuses = retry_statuses.concat([200]);
+          return validateStatuses.includes(status);
+        },
+      })
+      .then(function (response) {
+        // handle success
+        console.log(response);
 
-        const deployment_status = fulfillment.data.status;
+        if (retry_statuses.includes(response.status)) {
+          return sleep(waitBetween).then(poll);
+        }
+
+        const deployment_status = response.data.status;
         switch (deployment_status) {
           case "RUNNING":
           case "QUEUED":
@@ -49,18 +60,16 @@ let watchDeployment = function(api_url, harness_api_key, options = {}) {
               message: `Unknown status from Harness: ${deployment_status}. Please check deployment link to see what happened and confirm everything's ok.`,
             });
         }
-      },
-      (rejection) => {
-        console.log(rejection);
+      })
+      .catch(function (error) {
+        return error;
+        // handle error
+        console.log(error);
 
-        if (retry_statuses.includes(rejection.response.status)) {
-          return sleep(waitBetween).then(poll);
-        }
         return Promise.reject({
           error: `Unexpected HTTP status ${rejection.response.status}`,
         });
-      }
-    );
+      });
   }
 
   return Promise.race([
