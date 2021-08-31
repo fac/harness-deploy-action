@@ -43,7 +43,7 @@ describe("the JS entrypoint to the GitHub action", () => {
     process.env["INPUT_SERVICES"] = "pin, cush ,ion";
     process.env["INPUT_WEBHOOKURL"] = "https://example.com/harness/webhook";
     process.env["INPUT_VERSION"] = "v0";
-    process.env["INPUT_WAITFORDEPLOY"] = "true";
+    process.env["INPUT_WAITFORDEPLOY"] = "false";
 
     const http_mock = new MockAdapter(axios);
     http_mock.onPost("https://example.com/harness/webhook").reply(200, {
@@ -60,7 +60,7 @@ describe("the JS entrypoint to the GitHub action", () => {
     const entrypoint = require("./index.js");
 
     expect(consoleSpy).toHaveBeenCalledWith(
-      "sending request to start deployment"
+      "Deploying application:pincushion (pin, cush ,ion) at v0"
     );
   });
 });
