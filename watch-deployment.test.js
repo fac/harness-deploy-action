@@ -68,12 +68,12 @@ describe("watchDeployment", () => {
       .replyOnce(200, {
         status: "FAILED",
       });
-
     return expect(
       watchDeployment("https://example.org/api", "HARNESS_TEST_API_KEY", {
         waitBetween: 0.1,
       })
-    ).resolves.toMatchObject({
+    ).rejects.toMatchObject({
+      error: "FAILED",
       message: expect.stringContaining("Deployment has failed"),
     });
   });
@@ -96,7 +96,7 @@ describe("watchDeployment", () => {
       watchDeployment("https://example.org/api", "HARNESS_TEST_API_KEY", {
         waitBetween: 0.1,
       })
-    ).resolves.toMatchObject({
+    ).rejects.toMatchObject({
       error: "ABORTED",
       message: expect.stringContaining("Deployment was aborted"),
     });
@@ -120,7 +120,7 @@ describe("watchDeployment", () => {
       watchDeployment("https://example.org/api", "HARNESS_TEST_API_KEY", {
         waitBetween: 0.1,
       })
-    ).resolves.toMatchObject({
+    ).rejects.toMatchObject({
       error: "REJECTED",
       message: expect.stringContaining("Deployment was rejected"),
     });
@@ -144,7 +144,7 @@ describe("watchDeployment", () => {
       watchDeployment("https://example.org/api", "HARNESS_TEST_API_KEY", {
         waitBetween: 0.1,
       })
-    ).resolves.toMatchObject({
+    ).rejects.toMatchObject({
       error: "UH OH",
       message: expect.stringContaining("Unknown status from Harness: UH OH."),
     });
@@ -168,7 +168,7 @@ describe("watchDeployment", () => {
       watchDeployment("https://example.org/api", "HARNESS_TEST_API_KEY", {
         waitBetween: 0.1,
       })
-    ).resolves.toMatchObject({
+    ).rejects.toMatchObject({
       error: "UNEXPECTED",
       message: expect.stringContaining(
         "Unknown status from Harness: UNEXPECTED. Please check deployment link to see what happened and confirm everything's ok."
