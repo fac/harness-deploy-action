@@ -19,16 +19,18 @@ const waitForDeploy = core.getBooleanInput("waitForDeploy");
 console.log(`Deploying application:${application} (${services}) at ${version}`);
 
 sendHarnessDeployRequest(webhookUrl, application, version, services)
-  .then(({ harness_url, api_url, messages }) => {
-    core.setOutput("harness_url", harness_url);
+  .then(({ responseData, messages }) => {
+    core.setOutput("harness_url", responseData.uiUrl);
+    core.setOutput("harness_api_url", responseData.apiUrl);
     messages.forEach((msg) => {
       core.info(msg);
     });
-    return api_url;
+    return responseData.apiUrl;
   })
-  .then((api_url) => {
+  .then((apiUrl) => {
     if (waitForDeploy) {
-      watchDeployment(api_url, harnessApiKey);
+      console.log("watching deployment");
+      watchDeployment(apiUrl, harnessApiKey);
     }
   })
   .catch(({ error, message }) => {
@@ -4345,6 +4347,7 @@ module.exports = {
 const axios = __nccwpck_require__(6545).default;
 
 let checkHarnessDeployResponse = function (statusCode, data) {
+  console.log("checking response from request to start deployment");
   console.log(statusCode, data);
 
   const { requestId, status, error, uiUrl, apiUrl, message } = data;
@@ -4365,8 +4368,7 @@ let checkHarnessDeployResponse = function (statusCode, data) {
       }
 
       resolve({
-        uiUrl,
-        apiUrl,
+        data,
         messages: [info_message, `Harness deploy submitted, view at ${uiUrl}`],
       });
     } else {
@@ -4424,6 +4426,8 @@ let sendHarnessDeployRequest = function (
     version,
     services
   );
+
+  console.log("sending request to start deployment");
   const request = axios.post(webhookUrl, request_body, axiosConfig);
 
   return request.then((response) =>
@@ -4445,7 +4449,9 @@ module.exports = {
 
 const axios = __nccwpck_require__(6545).default;
 
-let watchDeployment = function(api_url, harness_api_key, options = {}) {
+let watchDeployment = function (api_url, harness_api_key, options = {}) {
+  console.log("watching deployment");
+
   const { waitBetween, timeLimit } = Object.assign(
     { waitBetween: 10, timeLimit: 1200 },
     options
@@ -4461,11 +4467,24 @@ let watchDeployment = function(api_url, harness_api_key, options = {}) {
   }
 
   function poll() {
-    return client.get(api_url).then(
-      (fulfillment) => {
-        console.log(fulfillment);
+    console.log("polling...");
+    return client
+      .get(api_url, {
+        validateStatus: function (status) {
+          const validateStatuses = retry_statuses.concat([200]);
+          return validateStatuses.includes(status);
+        },
+      })
+      .then(function (response) {
+        // handle API GET request success
+        console.log("polling response success");
+        console.log(response);
 
-        const deployment_status = fulfillment.data.status;
+        if (retry_statuses.includes(response.status)) {
+          return sleep(waitBetween).then(poll);
+        }
+
+        const deployment_status = response.data.status;
         switch (deployment_status) {
           case "RUNNING":
           case "QUEUED":
@@ -4494,18 +4513,17 @@ let watchDeployment = function(api_url, harness_api_key, options = {}) {
               message: `Unknown status from Harness: ${deployment_status}. Please check deployment link to see what happened and confirm everything's ok.`,
             });
         }
-      },
-      (rejection) => {
-        console.log(rejection);
+      })
+      .catch(function (error) {
+        // handle error
+        console.log("polling response error");
+        console.log(error);
 
-        if (retry_statuses.includes(rejection.response.status)) {
-          return sleep(waitBetween).then(poll);
-        }
         return Promise.reject({
-          error: `Unexpected HTTP status ${rejection.response.status}`,
+          error: error.error,
+          message: error.message,
         });
-      }
-    );
+      });
   }
 
   return Promise.race([
@@ -4514,7 +4532,7 @@ let watchDeployment = function(api_url, harness_api_key, options = {}) {
       Promise.reject(`Time limit of ${timeLimit} hit!`)
     ),
   ]);
-}
+};
 
 module.exports = { watchDeployment };
 
