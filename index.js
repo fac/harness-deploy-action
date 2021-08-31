@@ -20,6 +20,7 @@ sendHarnessDeployRequest(webhookUrl, application, version, services)
 
     messages.forEach((msg) => {
       core.info(msg);
+      console.log(msg)
     });
 
     if (waitForDeploy) {
