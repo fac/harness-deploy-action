@@ -82,6 +82,8 @@ describe("the JS entrypoint to the GitHub action", () => {
 
     expect(coreSpy.mock.calls).toEqual([
       ["Deploying application:pincushion (pin, cush ,ion) at v0"],
+      ["Sending request to start deployment"],
+      ["Checking response from request to start deployment"],
       ["🚀 Deployment pipeline is now running on Harness"],
       [
         "Harness deploy submitted, view at app.harness.io/#/account/aaa/app/bbb/pipeline-execution/ccc/workflow-execution/undefined/details",

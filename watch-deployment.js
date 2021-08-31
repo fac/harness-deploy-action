@@ -1,4 +1,5 @@
 const axios = require("axios").default;
+const core = require("@actions/core");
 
 let watchDeployment = function (api_url, harness_api_key, options = {}) {
   const { waitBetween, timeLimit } = Object.assign(
@@ -25,10 +26,10 @@ let watchDeployment = function (api_url, harness_api_key, options = {}) {
       })
       .then(function (response) {
         // handle API GET request success
-        console.log(`Deploy status: ${response.data.status}`);
+        core.info(`Deploy status: ${response.data.status}`);
 
         if (retry_statuses.includes(response.status)) {
-          console.log(
+          core.info(
             `Response HTTP status: ${response.status}, retrying poll..`
           );
           return sleep(waitBetween).then(poll);
@@ -66,8 +67,8 @@ let watchDeployment = function (api_url, harness_api_key, options = {}) {
       })
       .catch(function (error) {
         // handle error
-        console.log("polling response error:");
-        console.log(error);
+        core.info("polling response error:");
+        core.info(JSON.stringify(error, null, 2));
 
         return Promise.reject({
           error: error.error,
