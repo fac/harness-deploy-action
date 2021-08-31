@@ -16,18 +16,17 @@ const services = core.getInput("services");
 const harnessApiKey = core.getInput("harnessApiKey");
 const waitForDeploy = core.getBooleanInput("waitForDeploy");
 
-console.log(`Deploying application:${application} (${services}) at ${version}`);
+core.info(`Deploying application:${application} (${services}) at ${version}`);
 
 sendHarnessDeployRequest(webhookUrl, application, version, services)
   .then((response) => {
-    console.log("Response from sendHarnessDeployRequest is:");
-    console.log(response);
+    core.debug("Response from sendHarnessDeployRequest is:");
+    core.debug(response);
     const responseData = response.responseData;
     const messages = response.messages;
 
     messages.forEach((msg) => {
       core.info(msg);
-      console.log(msg)
     });
 
     if (waitForDeploy) {
@@ -4349,9 +4348,10 @@ module.exports = {
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const axios = __nccwpck_require__(6545).default;
+const core = __nccwpck_require__(2186);
 
 let checkHarnessDeployResponse = function (statusCode, data) {
-  console.log("Checking response from request to start deployment");
+  core.info("Checking response from request to start deployment");
 
   const { requestId, status, error, uiUrl, apiUrl, message } = data;
 
@@ -4430,7 +4430,7 @@ let sendHarnessDeployRequest = function (
     services
   );
 
-  console.log("Sending request to start deployment");
+  core.info("Sending request to start deployment");
   const request = axios.post(webhookUrl, request_body, axiosConfig);
 
   return request.then((response) =>
@@ -4451,6 +4451,7 @@ module.exports = {
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const axios = __nccwpck_require__(6545).default;
+const core = __nccwpck_require__(2186);
 
 let watchDeployment = function (api_url, harness_api_key, options = {}) {
   const { waitBetween, timeLimit } = Object.assign(
@@ -4477,10 +4478,10 @@ let watchDeployment = function (api_url, harness_api_key, options = {}) {
       })
       .then(function (response) {
         // handle API GET request success
-        console.log(`Deploy status: ${response.data.status}`);
+        core.info(`Deploy status: ${response.data.status}`);
 
         if (retry_statuses.includes(response.status)) {
-          console.log(
+          core.info(
             `Response HTTP status: ${response.status}, retrying poll..`
           );
           return sleep(waitBetween).then(poll);
@@ -4518,8 +4519,8 @@ let watchDeployment = function (api_url, harness_api_key, options = {}) {
       })
       .catch(function (error) {
         // handle error
-        console.log("polling response error:");
-        console.log(error);
+        core.info("polling response error:");
+        core.info(JSON.stringify(error, null, 2));
 
         return Promise.reject({
           error: error.error,
