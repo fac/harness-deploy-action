@@ -18,8 +18,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run: yarn install
-    - run: yarn run prepare
-      name: Compile javascript into the dist folder with ncc
+    - name: Compile javascript into the dist folder with ncc
+      run: yarn run prepare
+
     - name: Check latest code is packaged in the dist folder
       id: check-for-changes
       run: |
