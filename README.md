@@ -16,7 +16,7 @@ Call the [Harness.io](https://harness.io/) API to deploy an application.
        services: web,console,job
        version: ${{ github.sha }}
        waitForDeploy: false # optional
-       harnessApiKey: abcd # only required when waitForDeploy is true
+       harnessApiKey: ${{ secrets.HARNESS_API_KEY }} # only required when waitForDeploy is true
 
    - name: Deploy Link
      run: |
