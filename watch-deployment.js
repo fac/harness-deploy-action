@@ -8,7 +8,7 @@ let watchDeployment = function (
   options = {}
 ) {
   const { waitBetween, timeLimit } = Object.assign(
-    { waitBetween: 10, timeLimit: 1200 },
+    { waitBetween: 10, timeLimit: 2400 },
     options
   );
   const retry_statuses = [408, 429, 503];

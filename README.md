@@ -37,7 +37,8 @@ yarn run prepare
 
 Since the packaged index.js is run from the dist folder.
 
-After pushing to GitHub, an Action running on this repo will check if the `dist/` folder is up to date for you, and warn if it's not.
+After pushing to GitHub, an Action running on this repo will check if the `dist/` folder is up to date for you. If it's not up to date, the Action
+will run `yarn prepare` to update the `dist/` folder for you and push a commit back to your branch with the updated code.
 
 ```bash
 git add dist
