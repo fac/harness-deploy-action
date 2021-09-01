@@ -3,31 +3,38 @@ const { watchDeployment } = require("./watch-deployment.js");
 const axios = require("axios");
 const MockAdapter = require("axios-mock-adapter");
 
+const mockHarnessApiUrl = "http://harness.com/deployment-api-endpoint";
+const mockHarnessUiUrl = "http://harness.com/watch-deployment";
+
 describe("watchDeployment", () => {
   test("polling on a successful deployment", () => {
     expect.assertions(1);
 
     const http_mock = new MockAdapter(axios);
     http_mock
-      .onGet("https://example.org/api")
+      .onGet(mockHarnessApiUrl)
       .replyOnce(200, {
         status: "RUNNING",
       })
-      .onGet("https://example.org/api")
+      .onGet(mockHarnessApiUrl)
       .replyOnce(200, {
         status: "RUNNING",
       })
-      .onGet("https://example.org/api")
+      .onGet(mockHarnessApiUrl)
       .replyOnce(200, {
         status: "SUCCESS",
       });
 
-    return watchDeployment("https://example.org/api", "HARNESS_TEST_API_KEY", {
+    return watchDeployment(
+      mockHarnessApiUrl,
+      mockHarnessUiUrl,
+      "HARNESS_TEST_API_KEY",
+      {
         waitBetween: 0.1,
-      })
-      .then((result) => {
-        expect(result).toBe("🎉 Deployment succeeded");
-      });
+      }
+    ).then((result) => {
+      expect(result).toBe("🎉 Deployment succeeded");
+    });
   });
 
   test("polling hitting the timeout", () => {
@@ -35,24 +42,29 @@ describe("watchDeployment", () => {
 
     const http_mock = new MockAdapter(axios);
     http_mock
-      .onGet("https://example.org/api")
+      .onGet(mockHarnessApiUrl)
       .replyOnce(200, {
         status: "RUNNING",
       })
-      .onGet("https://example.org/api")
+      .onGet(mockHarnessApiUrl)
       .replyOnce(200, {
         status: "RUNNING",
       })
-      .onGet("https://example.org/api")
+      .onGet(mockHarnessApiUrl)
       .replyOnce(200, {
         status: "SUCCESS",
       });
 
     return expect(
-      watchDeployment("https://example.org/api", "HARNESS_TEST_API_KEY", {
-        waitBetween: 0.5,
-        timeLimit: 0.01,
-      })
+      watchDeployment(
+        mockHarnessApiUrl,
+        mockHarnessUiUrl,
+        "HARNESS_TEST_API_KEY",
+        {
+          waitBetween: 0.5,
+          timeLimit: 0.01,
+        }
+      )
     ).rejects.toEqual("Time limit of 0.01 hit!");
   });
 
@@ -61,20 +73,25 @@ describe("watchDeployment", () => {
 
     const http_mock = new MockAdapter(axios);
     http_mock
-      .onGet("https://example.org/api")
+      .onGet(mockHarnessApiUrl)
       .replyOnce(200, {
         status: "RUNNING",
       })
-      .onGet("https://example.org/api")
+      .onGet(mockHarnessApiUrl)
       .replyOnce(200, {
         status: "FAILED",
       });
-
     return expect(
-      watchDeployment("https://example.org/api", "HARNESS_TEST_API_KEY", {
-        waitBetween: 0.1,
-      })
+      watchDeployment(
+        mockHarnessApiUrl,
+        mockHarnessUiUrl,
+        "HARNESS_TEST_API_KEY",
+        {
+          waitBetween: 0.1,
+        }
+      )
     ).rejects.toMatchObject({
+      error: "FAILED",
       message: expect.stringContaining("Deployment has failed"),
     });
   });
@@ -84,19 +101,24 @@ describe("watchDeployment", () => {
 
     const http_mock = new MockAdapter(axios);
     http_mock
-      .onGet("https://example.org/api")
+      .onGet(mockHarnessApiUrl)
       .replyOnce(200, {
         status: "RUNNING",
       })
-      .onGet("https://example.org/api")
+      .onGet(mockHarnessApiUrl)
       .replyOnce(200, {
         status: "ABORTED",
       });
 
     return expect(
-      watchDeployment("https://example.org/api", "HARNESS_TEST_API_KEY", {
-        waitBetween: 0.1,
-      })
+      watchDeployment(
+        mockHarnessApiUrl,
+        mockHarnessUiUrl,
+        "HARNESS_TEST_API_KEY",
+        {
+          waitBetween: 0.1,
+        }
+      )
     ).rejects.toMatchObject({
       error: "ABORTED",
       message: expect.stringContaining("Deployment was aborted"),
@@ -108,19 +130,24 @@ describe("watchDeployment", () => {
 
     const http_mock = new MockAdapter(axios);
     http_mock
-      .onGet("https://example.org/api")
+      .onGet(mockHarnessApiUrl)
       .replyOnce(200, {
         status: "RUNNING",
       })
-      .onGet("https://example.org/api")
+      .onGet(mockHarnessApiUrl)
       .replyOnce(200, {
         status: "REJECTED",
       });
 
     return expect(
-      watchDeployment("https://example.org/api", "HARNESS_TEST_API_KEY", {
-        waitBetween: 0.1,
-      })
+      watchDeployment(
+        mockHarnessApiUrl,
+        mockHarnessUiUrl,
+        "HARNESS_TEST_API_KEY",
+        {
+          waitBetween: 0.1,
+        }
+      )
     ).rejects.toMatchObject({
       error: "REJECTED",
       message: expect.stringContaining("Deployment was rejected"),
@@ -132,19 +159,24 @@ describe("watchDeployment", () => {
 
     const http_mock = new MockAdapter(axios);
     http_mock
-      .onGet("https://example.org/api")
+      .onGet(mockHarnessApiUrl)
       .replyOnce(200, {
         status: "RUNNING",
       })
-      .onGet("https://example.org/api")
+      .onGet(mockHarnessApiUrl)
       .replyOnce(200, {
         status: "UH OH",
       });
 
     return expect(
-      watchDeployment("https://example.org/api", "HARNESS_TEST_API_KEY", {
-        waitBetween: 0.1,
-      })
+      watchDeployment(
+        mockHarnessApiUrl,
+        mockHarnessUiUrl,
+        "HARNESS_TEST_API_KEY",
+        {
+          waitBetween: 0.1,
+        }
+      )
     ).rejects.toMatchObject({
       error: "UH OH",
       message: expect.stringContaining("Unknown status from Harness: UH OH."),
@@ -156,19 +188,24 @@ describe("watchDeployment", () => {
 
     const http_mock = new MockAdapter(axios);
     http_mock
-      .onGet("https://example.org/api")
+      .onGet(mockHarnessApiUrl)
       .replyOnce(200, {
         status: "QUEUED",
       })
-      .onGet("https://example.org/api")
+      .onGet(mockHarnessApiUrl)
       .replyOnce(200, {
         status: "UNEXPECTED",
       });
 
     return expect(
-      watchDeployment("https://example.org/api", "HARNESS_TEST_API_KEY", {
-        waitBetween: 0.1,
-      })
+      watchDeployment(
+        mockHarnessApiUrl,
+        mockHarnessUiUrl,
+        "HARNESS_TEST_API_KEY",
+        {
+          waitBetween: 0.1,
+        }
+      )
     ).rejects.toMatchObject({
       error: "UNEXPECTED",
       message: expect.stringContaining(
@@ -182,24 +219,28 @@ describe("watchDeployment", () => {
 
     const http_mock = new MockAdapter(axios);
     http_mock
-      .onGet("https://example.org/api")
+      .onGet(mockHarnessApiUrl)
       .replyOnce(200, {
         status: "RUNNING",
       })
-      .onGet("https://example.org/api")
+      .onGet(mockHarnessApiUrl)
       .replyOnce(408, {
         status: "KNOWN_HTTP_STATUS_CODE",
       })
-      .onGet("https://example.org/api")
+      .onGet(mockHarnessApiUrl)
       .replyOnce(200, {
         status: "SUCCESS",
       });
 
-    return watchDeployment("https://example.org/api", "HARNESS_TEST_API_KEY", {
+    return watchDeployment(
+      mockHarnessApiUrl,
+      mockHarnessUiUrl,
+      "HARNESS_TEST_API_KEY",
+      {
         waitBetween: 0.1,
-      })
-      .then((result) => {
-        expect(result).toBe("🎉 Deployment succeeded");
-      });
+      }
+    ).then((result) => {
+      expect(result).toBe("🎉 Deployment succeeded");
+    });
   });
 });

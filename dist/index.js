@@ -16,20 +16,25 @@ const services = core.getInput("services");
 const harnessApiKey = core.getInput("harnessApiKey");
 const waitForDeploy = core.getBooleanInput("waitForDeploy");
 
-console.log(`Deploying application:${application} (${services}) at ${version}`);
+core.info(`Deploying application:${application} (${services}) at ${version}`);
 
 sendHarnessDeployRequest(webhookUrl, application, version, services)
-  .then(({ harness_url, api_url, messages }) => {
-    core.setOutput("harness_url", harness_url);
+  .then((response) => {
+    core.debug("Response from sendHarnessDeployRequest is:");
+    core.debug(response);
+    const responseData = response.responseData;
+    const messages = response.messages;
+
     messages.forEach((msg) => {
       core.info(msg);
     });
-    return api_url;
-  })
-  .then((api_url) => {
+
     if (waitForDeploy) {
-      watchDeployment(api_url, harnessApiKey);
+      core.info("Polling for Harness deploy status:");
+      watchDeployment(response.data.apiUrl, response.data.uiUrl, harnessApiKey);
     }
+
+    core.setOutput("harness_url", response.data.uiUrl);
   })
   .catch(({ error, message }) => {
     core.setOutput("error", error);
@@ -4343,28 +4348,34 @@ module.exports = {
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const axios = __nccwpck_require__(6545).default;
+const core = __nccwpck_require__(2186);
 
-let checkHarnessDeployResponse = function(statusCode, data) {
-  const { api_url, harness_url, error } = data;
+let checkHarnessDeployResponse = function (statusCode, data) {
+  core.info("Checking response from request to start deployment");
+
+  const { requestId, status, error, uiUrl, apiUrl, message } = data;
 
   return new Promise((resolve, reject) => {
-    const request_success = [200, 201, 400].includes( statusCode );
-    const deploy_success = ['QUEUED', 'RUNNING', 'PAUSED'].includes( data.status );
+    const request_success = [200, 201, 400].includes(statusCode);
+    const deploy_success = ["QUEUED", "RUNNING", "PAUSED"].includes(
+      data.status
+    );
 
     var info_message;
-    if ( request_success && deploy_success ) {
-      if ( data.status == 'PAUSED' ) {
-        info_message = "⚠️ Waiting for approval to start the deployment pipeline on Harness";
+    if (request_success && deploy_success) {
+      if (data.status == "PAUSED") {
+        info_message =
+          "⚠️ Waiting for approval to start the deployment pipeline on Harness";
       } else {
         info_message = "🚀 Deployment pipeline is now running on Harness";
       }
+
       resolve({
-        harness_url,
-        api_url,
-        messages: [info_message, `Harness deploy submitted, view at ${harness_url}`],
+        data,
+        messages: [info_message, `Harness deploy submitted, view at ${uiUrl}`],
       });
     } else {
-      if ( error ) {
+      if (error) {
         reject({
           error,
           message: `💣 Failed to start deployment: ${error}`,
@@ -4373,35 +4384,66 @@ let checkHarnessDeployResponse = function(statusCode, data) {
         reject({
           error,
           message: `💣 Deployment pipeline state is ${data.status}, check the health through the Harness website.`,
-         });
+        });
       }
     }
   });
-}
+};
 
-let makeHarnessDeployRequestPayload = function(application, version, services) {
-  const artifacts = services.split(/\s*,\s*/).map(x => { return { service: x, buildNumber: version } });
+let makeHarnessDeployRequestPayload = function (
+  application,
+  version,
+  services
+) {
+  const artifacts = services.split(/\s*,\s*/).map((x) => {
+    return { service: x, buildNumber: version };
+  });
 
-  return JSON.stringify({
-    application,
-    artifacts
-  }, undefined, 2);
-}
+  return JSON.stringify(
+    {
+      application,
+      artifacts,
+    },
+    undefined,
+    2
+  );
+};
 
 let axiosConfig = {
   headers: {
-      'Content-Type': 'application/json;charset=UTF-8'
-  }
+    "Content-Type": "application/json;charset=UTF-8",
+  },
+  validateStatus: function (status) {
+    return [200, 201, 400].includes(status);
+  },
 };
 
-let sendHarnessDeployRequest = function(webhookUrl, application, version, services) {
-  const request_body = makeHarnessDeployRequestPayload(application, version, services);
+let sendHarnessDeployRequest = function (
+  webhookUrl,
+  application,
+  version,
+  services
+) {
+  const request_body = makeHarnessDeployRequestPayload(
+    application,
+    version,
+    services
+  );
+
+  core.info("Sending request to start deployment");
   const request = axios.post(webhookUrl, request_body, axiosConfig);
 
-  return request.then((response) => checkHarnessDeployResponse(response.status, response.data));
-}
+  return request.then((response) =>
+    checkHarnessDeployResponse(response.status, response.data)
+  );
+};
 
-module.exports = {checkHarnessDeployResponse, makeHarnessDeployRequestPayload, sendHarnessDeployRequest};
+module.exports = {
+  checkHarnessDeployResponse,
+  makeHarnessDeployRequestPayload,
+  sendHarnessDeployRequest,
+};
+
 
 /***/ }),
 
@@ -4409,8 +4451,14 @@ module.exports = {checkHarnessDeployResponse, makeHarnessDeployRequestPayload, s
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const axios = __nccwpck_require__(6545).default;
+const core = __nccwpck_require__(2186);
 
-let watchDeployment = function(api_url, harness_api_key, options = {}) {
+let watchDeployment = function (
+  harness_api_url,
+  harness_ui_url,
+  harness_api_key,
+  options = {}
+) {
   const { waitBetween, timeLimit } = Object.assign(
     { waitBetween: 10, timeLimit: 1200 },
     options
@@ -4426,9 +4474,27 @@ let watchDeployment = function(api_url, harness_api_key, options = {}) {
   }
 
   function poll() {
-    return client.get(api_url).then(
-      (fulfillment) => {
-        const deployment_status = fulfillment.data.status;
+    core.info(`Watch Harness deploy at: ${harness_ui_url}`);
+
+    return client
+      .get(harness_api_url, {
+        validateStatus: function (status) {
+          const validateStatuses = retry_statuses.concat([200]);
+          return validateStatuses.includes(status);
+        },
+      })
+      .then(function (response) {
+        // handle API GET request success
+        core.info(`Deploy status: ${response.data.status}`);
+
+        if (retry_statuses.includes(response.status)) {
+          core.info(
+            `Response HTTP status: ${response.status}, retrying poll..`
+          );
+          return sleep(waitBetween).then(poll);
+        }
+
+        const deployment_status = response.data.status;
         switch (deployment_status) {
           case "RUNNING":
           case "QUEUED":
@@ -4457,16 +4523,17 @@ let watchDeployment = function(api_url, harness_api_key, options = {}) {
               message: `Unknown status from Harness: ${deployment_status}. Please check deployment link to see what happened and confirm everything's ok.`,
             });
         }
-      },
-      (rejection) => {
-        if (retry_statuses.includes(rejection.response.status)) {
-          return sleep(waitBetween).then(poll);
-        }
+      })
+      .catch(function (error) {
+        // handle error
+        core.info("polling response error:");
+        core.info(JSON.stringify(error, null, 2));
+
         return Promise.reject({
-          error: `Unexpected HTTP status ${rejection.response.status}`,
+          error: error.error,
+          message: error.message,
         });
-      }
-    );
+      });
   }
 
   return Promise.race([
@@ -4475,7 +4542,7 @@ let watchDeployment = function(api_url, harness_api_key, options = {}) {
       Promise.reject(`Time limit of ${timeLimit} hit!`)
     ),
   ]);
-}
+};
 
 module.exports = { watchDeployment };
 

@@ -1,6 +1,12 @@
 const axios = require("axios").default;
+const core = require("@actions/core");
 
-let watchDeployment = function(api_url, harness_api_key, options = {}) {
+let watchDeployment = function (
+  harness_api_url,
+  harness_ui_url,
+  harness_api_key,
+  options = {}
+) {
   const { waitBetween, timeLimit } = Object.assign(
     { waitBetween: 10, timeLimit: 1200 },
     options
@@ -16,9 +22,27 @@ let watchDeployment = function(api_url, harness_api_key, options = {}) {
   }
 
   function poll() {
-    return client.get(api_url).then(
-      (fulfillment) => {
-        const deployment_status = fulfillment.data.status;
+    core.info(`Watch Harness deploy at: ${harness_ui_url}`);
+
+    return client
+      .get(harness_api_url, {
+        validateStatus: function (status) {
+          const validateStatuses = retry_statuses.concat([200]);
+          return validateStatuses.includes(status);
+        },
+      })
+      .then(function (response) {
+        // handle API GET request success
+        core.info(`Deploy status: ${response.data.status}`);
+
+        if (retry_statuses.includes(response.status)) {
+          core.info(
+            `Response HTTP status: ${response.status}, retrying poll..`
+          );
+          return sleep(waitBetween).then(poll);
+        }
+
+        const deployment_status = response.data.status;
         switch (deployment_status) {
           case "RUNNING":
           case "QUEUED":
@@ -47,16 +71,17 @@ let watchDeployment = function(api_url, harness_api_key, options = {}) {
               message: `Unknown status from Harness: ${deployment_status}. Please check deployment link to see what happened and confirm everything's ok.`,
             });
         }
-      },
-      (rejection) => {
-        if (retry_statuses.includes(rejection.response.status)) {
-          return sleep(waitBetween).then(poll);
-        }
+      })
+      .catch(function (error) {
+        // handle error
+        core.info("polling response error:");
+        core.info(JSON.stringify(error, null, 2));
+
         return Promise.reject({
-          error: `Unexpected HTTP status ${rejection.response.status}`,
+          error: error.error,
+          message: error.message,
         });
-      }
-    );
+      });
   }
 
   return Promise.race([
@@ -65,6 +90,6 @@ let watchDeployment = function(api_url, harness_api_key, options = {}) {
       Promise.reject(`Time limit of ${timeLimit} hit!`)
     ),
   ]);
-}
+};
 
 module.exports = { watchDeployment };
