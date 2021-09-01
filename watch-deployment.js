@@ -2,7 +2,7 @@ const axios = require("axios").default;
 
 let watchDeployment = function(api_url, harness_api_key, options = {}) {
   const { waitBetween, timeLimit } = Object.assign(
-    { waitBetween: 10, timeLimit: 1200 },
+    { waitBetween: 10, timeLimit: 2400 },
     options
   );
   const retry_statuses = [408, 429, 503];
