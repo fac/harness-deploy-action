@@ -15,12 +15,17 @@ inputs:
   version:
     description: Version to deploy
     required: true
+  harnessApiKey:
+    description: Key to use to communicate with Harness, needed when waitForDeploy is true
+  waitForDeploy:
+    description: Whether to wait for the deployment to complete before completing. Defaults to `false` (don't wait)
+    default: false
 outputs:
   harness_url:
     description: URL to find and watch the deploy
   error:
-    description: JSON error message from the API incase of failure.
+    description: JSON error message from the API in case of failure.
 
 runs:
   using: 'node12'
-  main: index.js
+  main: dist/index.js
