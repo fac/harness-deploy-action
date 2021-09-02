@@ -4500,7 +4500,7 @@ let watchDeployment = function (
           case "QUEUED":
             return sleep(waitBetween).then(poll);
           case "SUCCESS":
-            return "🎉 Deployment succeeded";
+            return Promise.resolve("🎉 Deployment succeeded");
           case "ABORTED":
             return Promise.reject({
               error: deployment_status,
