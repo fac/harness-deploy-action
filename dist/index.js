@@ -4459,10 +4459,8 @@ let watchDeployment = function (
   harness_api_key,
   options = {}
 ) {
-  const { waitBetween, timeLimit } = Object.assign(
-    { waitBetween: 10, timeLimit: 2400 },
-    options
-  );
+  const { waitBetween } = Object.assign({ waitBetween: 10 }, options);
+
   const retry_statuses = [408, 429, 503];
   const client = axios.create({
     maxRedirects: 0,
@@ -4500,7 +4498,7 @@ let watchDeployment = function (
           case "QUEUED":
             return sleep(waitBetween).then(poll);
           case "SUCCESS":
-            return "🎉 Deployment succeeded";
+            return Promise.resolve("🎉 Deployment succeeded");
           case "ABORTED":
             return Promise.reject({
               error: deployment_status,
@@ -4536,12 +4534,7 @@ let watchDeployment = function (
       });
   }
 
-  return Promise.race([
-    poll(),
-    sleep(timeLimit).then(() =>
-      Promise.reject(`Time limit of ${timeLimit} hit!`)
-    ),
-  ]);
+  return poll();
 };
 
 module.exports = { watchDeployment };
