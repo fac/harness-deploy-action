@@ -7,10 +7,8 @@ let watchDeployment = function (
   harness_api_key,
   options = {}
 ) {
-  const { waitBetween, timeLimit } = Object.assign(
-    { waitBetween: 10, timeLimit: 2400 },
-    options
-  );
+  const { waitBetween } = Object.assign({ waitBetween: 10 }, options);
+
   const retry_statuses = [408, 429, 503];
   const client = axios.create({
     maxRedirects: 0,
@@ -84,12 +82,7 @@ let watchDeployment = function (
       });
   }
 
-  return Promise.race([
-    poll(),
-    sleep(timeLimit).then(() =>
-      Promise.reject(`Time limit of ${timeLimit} hit!`)
-    ),
-  ]);
+  return poll();
 };
 
 module.exports = { watchDeployment };
