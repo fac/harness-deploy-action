@@ -4537,12 +4537,7 @@ let watchDeployment = function (
       });
   }
 
-  return Promise.race([
-    poll(),
-    sleep(timeLimit).then(() =>
-      Promise.reject(`Time limit of ${timeLimit} hit!`)
-    ),
-  ]);
+  return poll();
 };
 
 module.exports = { watchDeployment };
