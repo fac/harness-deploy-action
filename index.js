@@ -10,24 +10,25 @@ const harnessApiKey = core.getInput("harnessApiKey");
 const waitForDeploy = core.getBooleanInput("waitForDeploy");
 
 core.info(`Deploying application:${application} (${services}) at ${version}`);
-
 sendHarnessDeployRequest(webhookUrl, application, version, services)
-  .then((response) => {
+  .then(({ data, messages }) => {
     core.debug("Response from sendHarnessDeployRequest is:");
-    core.debug(response);
-    const responseData = response.responseData;
-    const messages = response.messages;
+    core.debug(data);
 
     messages.forEach((msg) => {
       core.info(msg);
     });
 
+    core.setOutput("harness_url", data.uiUrl);
+
     if (waitForDeploy) {
       core.info("Polling for Harness deploy status:");
-      watchDeployment(response.data.apiUrl, response.data.uiUrl, harnessApiKey);
+      return watchDeployment(data.apiUrl, data.uiUrl, harnessApiKey).then(
+        (message) => {
+          core.info(message);
+        }
+      );
     }
-
-    core.setOutput("harness_url", response.data.uiUrl);
   })
   .catch(({ error, message }) => {
     core.setOutput("error", error);

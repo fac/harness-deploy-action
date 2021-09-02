@@ -37,37 +37,6 @@ describe("watchDeployment", () => {
     });
   });
 
-  test("polling hitting the timeout", () => {
-    expect.assertions(1);
-
-    const http_mock = new MockAdapter(axios);
-    http_mock
-      .onGet(mockHarnessApiUrl)
-      .replyOnce(200, {
-        status: "RUNNING",
-      })
-      .onGet(mockHarnessApiUrl)
-      .replyOnce(200, {
-        status: "RUNNING",
-      })
-      .onGet(mockHarnessApiUrl)
-      .replyOnce(200, {
-        status: "SUCCESS",
-      });
-
-    return expect(
-      watchDeployment(
-        mockHarnessApiUrl,
-        mockHarnessUiUrl,
-        "HARNESS_TEST_API_KEY",
-        {
-          waitBetween: 0.5,
-          timeLimit: 0.01,
-        }
-      )
-    ).rejects.toEqual("Time limit of 0.01 hit!");
-  });
-
   test("polling ends when deployment failed", () => {
     expect.assertions(1);
 
