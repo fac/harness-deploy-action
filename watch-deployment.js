@@ -71,20 +71,19 @@ let watchDeployment = function (
               message: `Unknown status from Harness: ${deployment_status}. Please check deployment link to see what happened and confirm everything's ok.`,
             });
         }
-      })
-      .catch(function (error) {
-        // handle error
-        core.info("polling response error:");
-        core.info(JSON.stringify(error, null, 2));
-
-        return Promise.reject({
-          error: error.error,
-          message: error.message,
-        });
       });
   }
 
-  return poll();
-};
+  return poll().catch(function (error) {
+    // handle error
+    core.info("polling response error:");
+    core.info(JSON.stringify(error, null, 2));
+
+    return Promise.reject({
+      error: error.error,
+      message: error.message,
+    });
+  });
+}
 
 module.exports = { watchDeployment };
