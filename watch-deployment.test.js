@@ -162,8 +162,8 @@ describe("watchDeployment", () => {
         status: "QUEUED",
       })
       .onGet(mockHarnessApiUrl)
-      .replyOnce(200, {
-        status: "UNEXPECTED",
+      .replyOnce(201, {
+        status: "RUNNING",
       });
 
     return expect(
@@ -176,9 +176,9 @@ describe("watchDeployment", () => {
         }
       )
     ).rejects.toMatchObject({
-      error: "UNEXPECTED",
+      error: undefined,
       message: expect.stringContaining(
-        "Unknown status from Harness: UNEXPECTED. Please check deployment link to see what happened and confirm everything's ok."
+        "failed with status code 201"
       ),
     });
   });
