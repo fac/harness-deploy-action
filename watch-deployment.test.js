@@ -2,9 +2,16 @@ const { watchDeployment } = require("./watch-deployment.js");
 
 const axios = require("axios");
 const MockAdapter = require("axios-mock-adapter");
+const { mockProcessStdout } = require("jest-mock-process");
 
 const mockHarnessApiUrl = "http://harness.com/deployment-api-endpoint";
 const mockHarnessUiUrl = "http://harness.com/watch-deployment";
+var capturedStdout;
+
+// reset the captured calls before each test
+beforeEach(async () => {
+  capturedStdout = mockProcessStdout();
+});
 
 describe("watchDeployment", () => {
   test("polling on a successful deployment", () => {
