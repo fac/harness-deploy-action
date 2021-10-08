@@ -219,4 +219,37 @@ describe("watchDeployment", () => {
       expect(result).toBe("🎉 Deployment succeeded");
     });
   });
+
+  test("doesn't print multiple errors when polling fails", () => {
+    expect.assertions(1);
+
+    const http_mock = new MockAdapter(axios);
+    http_mock
+      .onGet(mockHarnessApiUrl)
+      .replyOnce(200, {
+        status: "RUNNING",
+      })
+      .onGet(mockHarnessApiUrl)
+      .replyOnce(200, {
+        status: "RUNNING",
+      })
+      .onGet(mockHarnessApiUrl)
+      .replyOnce(200, {
+        status: "FAILED",
+      })
+
+    return watchDeployment(
+      mockHarnessApiUrl,
+      mockHarnessUiUrl,
+      "HARNESS_TEST_API_KEY",
+      {
+        waitBetween: 0.1,
+      }
+    ).catch(() => {
+      const failure_messages = capturedStdout.mock.calls.filter(([msg, ...rest]) =>
+        msg == "polling response error:\n"
+      );
+      expect(failure_messages).toHaveLength(1);
+    });
+  });
 });
