@@ -2,9 +2,16 @@ const { watchDeployment } = require("./watch-deployment.js");
 
 const axios = require("axios");
 const MockAdapter = require("axios-mock-adapter");
+const { mockProcessStdout } = require("jest-mock-process");
 
 const mockHarnessApiUrl = "http://harness.com/deployment-api-endpoint";
 const mockHarnessUiUrl = "http://harness.com/watch-deployment";
+var capturedStdout;
+
+// reset the captured calls before each test
+beforeEach(async () => {
+  capturedStdout = mockProcessStdout();
+});
 
 describe("watchDeployment", () => {
   test("polling on a successful deployment", () => {
@@ -162,8 +169,8 @@ describe("watchDeployment", () => {
         status: "QUEUED",
       })
       .onGet(mockHarnessApiUrl)
-      .replyOnce(200, {
-        status: "UNEXPECTED",
+      .replyOnce(201, {
+        status: "RUNNING",
       });
 
     return expect(
@@ -176,9 +183,9 @@ describe("watchDeployment", () => {
         }
       )
     ).rejects.toMatchObject({
-      error: "UNEXPECTED",
+      error: undefined,
       message: expect.stringContaining(
-        "Unknown status from Harness: UNEXPECTED. Please check deployment link to see what happened and confirm everything's ok."
+        "failed with status code 201"
       ),
     });
   });
@@ -210,6 +217,39 @@ describe("watchDeployment", () => {
       }
     ).then((result) => {
       expect(result).toBe("🎉 Deployment succeeded");
+    });
+  });
+
+  test("doesn't print multiple errors when polling fails", () => {
+    expect.assertions(1);
+
+    const http_mock = new MockAdapter(axios);
+    http_mock
+      .onGet(mockHarnessApiUrl)
+      .replyOnce(200, {
+        status: "RUNNING",
+      })
+      .onGet(mockHarnessApiUrl)
+      .replyOnce(200, {
+        status: "RUNNING",
+      })
+      .onGet(mockHarnessApiUrl)
+      .replyOnce(200, {
+        status: "FAILED",
+      })
+
+    return watchDeployment(
+      mockHarnessApiUrl,
+      mockHarnessUiUrl,
+      "HARNESS_TEST_API_KEY",
+      {
+        waitBetween: 0.1,
+      }
+    ).catch(() => {
+      const failure_messages = capturedStdout.mock.calls.filter(([msg, ...rest]) =>
+        msg == "polling response error:\n"
+      );
+      expect(failure_messages).toHaveLength(1);
     });
   });
 });
