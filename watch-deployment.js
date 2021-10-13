@@ -23,6 +23,7 @@ let watchDeployment = function (
 
   function poll() {
     core.info(`Watch Harness deploy at: ${harness_ui_url}`);
+    const deadline = new Date(new Date().getTime() + waitBetween * 1000);
 
     return client
       .get(harness_api_url, {
@@ -40,14 +41,14 @@ let watchDeployment = function (
             core.info(
               `Response HTTP status: ${response.status}, retrying poll..`
             );
-            return sleep(waitBetween * 1000).then(poll);
+            return sleep(deadline - new Date()).then(poll);
           }
 
           const deployment_status = response.data.status;
           switch (deployment_status) {
             case "RUNNING":
             case "QUEUED":
-              return sleep(waitBetween * 1000).then(poll);
+              return sleep(deadline - new Date()).then(poll);
             case "SUCCESS":
               return "🎉 Deployment succeeded";
             case "ABORTED":
