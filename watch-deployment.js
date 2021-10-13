@@ -77,6 +77,7 @@ let watchDeployment = function (
         },
         error => {
           if (error.code === 'ECONNABORTED') {
+            core.info("request timed out, trying again");
             return sleep(deadline - new Date()).then(poll);
           }
           throw error;
