@@ -236,7 +236,7 @@ describe("watchDeployment", () => {
       .onGet(mockHarnessApiUrl)
       .replyOnce(200, {
         status: "FAILED",
-      })
+      });
 
     return watchDeployment(
       mockHarnessApiUrl,
