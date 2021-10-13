@@ -17,8 +17,8 @@ let watchDeployment = function (
     headers: { "X-Api-Key": harness_api_key },
   });
 
-  function sleep(seconds) {
-    return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+  function sleep(milliseconds) {
+    return new Promise((resolve) => setTimeout(resolve, Math.max(0, milliseconds)));
   }
 
   function poll() {
@@ -40,14 +40,14 @@ let watchDeployment = function (
             core.info(
               `Response HTTP status: ${response.status}, retrying poll..`
             );
-            return sleep(waitBetween).then(poll);
+            return sleep(waitBetween * 1000).then(poll);
           }
 
           const deployment_status = response.data.status;
           switch (deployment_status) {
             case "RUNNING":
             case "QUEUED":
-              return sleep(waitBetween).then(poll);
+              return sleep(waitBetween * 1000).then(poll);
             case "SUCCESS":
               return "🎉 Deployment succeeded";
             case "ABORTED":
