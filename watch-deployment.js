@@ -15,6 +15,7 @@ let watchDeployment = function (
   const client = axios.create({
     maxRedirects: 0,
     headers: { "X-Api-Key": harness_api_key },
+    timeout: waitBetween * 1000,
   });
 
   function sleep(milliseconds) {
@@ -73,6 +74,12 @@ let watchDeployment = function (
                 message: `Unknown status from Harness: ${deployment_status}. Please check deployment link to see what happened and confirm everything's ok.`,
               });
           }
+        },
+        error => {
+          if (error.code === 'ECONNABORTED') {
+            return sleep(deadline - new Date()).then(poll);
+          }
+          throw error;
         }
       );
   }
