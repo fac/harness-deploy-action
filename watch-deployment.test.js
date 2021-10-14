@@ -236,7 +236,7 @@ describe("watchDeployment", () => {
       .onGet(mockHarnessApiUrl)
       .replyOnce(200, {
         status: "FAILED",
-      })
+      });
 
     return watchDeployment(
       mockHarnessApiUrl,
@@ -251,5 +251,29 @@ describe("watchDeployment", () => {
       );
       expect(failure_messages).toHaveLength(1);
     });
+  });
+
+  test("retries when Harness times out", () => {
+    const http_mock = new MockAdapter(axios);
+    http_mock
+      .onGet(mockHarnessApiUrl)
+      .replyOnce(200, {
+        status: "RUNNING",
+      })
+      .onGet(mockHarnessApiUrl)
+      .timeoutOnce()
+      .onGet(mockHarnessApiUrl)
+      .replyOnce(200, {
+        status: "SUCCESS",
+      });
+
+    return watchDeployment(
+      mockHarnessApiUrl,
+      mockHarnessUiUrl,
+      "HARNESS_TEST_API_KEY",
+      {
+        waitBetween: 0.1,
+      }
+    );
   });
 });
