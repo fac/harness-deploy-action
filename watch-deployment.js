@@ -11,7 +11,7 @@ let watchDeployment = function (
     { waitBetween: 10, timeLimit: 2400 },
     options
   );
-  const retry_statuses = [408, 429, 503];
+  const retry_statuses = [408, 429, 500, 503];
   const client = axios.create({
     maxRedirects: 0,
     headers: { "X-Api-Key": harness_api_key },
