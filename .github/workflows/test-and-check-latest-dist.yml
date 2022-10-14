@@ -2,7 +2,6 @@ name: "Run Test and Package Latest JS"
 
 on:
   push:
-    branches:
 
 jobs:
   unit-tests:
@@ -26,13 +25,13 @@ jobs:
       run: |
         if [ "$(git status --porcelain | wc -l)" -eq 0 ]
         then
-          echo "::set-output name=CHANGES_TO_COMMIT::false"
+          echo "CHANGES_TO_COMMIT=false" >> "$GITHUB_OUTPUT"
         else
           echo "::group::Git diff to commit"
           git diff
           echo "::endgroup::"
 
-          echo "::set-output name=CHANGES_TO_COMMIT::true"
+          echo "CHANGES_TO_COMMIT=true" >> "$GITHUB_OUTPUT"
         fi
 
     - if: ${{ steps.check-for-changes.outputs.CHANGES_TO_COMMIT == 'true' }}
